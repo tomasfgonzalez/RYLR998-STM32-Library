@@ -11,6 +11,31 @@
 #include "stm32l0xx_hal.h"
 
 
+
+/*
+ * +RCV=<Address>,<Length>,<Data>,<RSSI>,<SNR>,
+	<Address> Transmitter Address ID
+	<Length> Data Length
+	<Data> ASCll Data
+	<RSSI> Received Signal Strength
+	<SNR> Signal-to-noise ratio
+ */
+
+
+
+
+typedef struct
+{
+	uint8_t 			address[2];
+	uint8_t				payloadLength;
+	uint8_t				rxBuffer[240];
+	int8_t				rssi;
+	uint8_t				snr;
+
+}RYLR_reciver_t;
+
+extern RYLR_reciver_t rxDataBuff;
+
 HAL_StatusTypeDef rylr998_sendData(UART_HandleTypeDef *uartHandle,uint16_t address, uint8_t *data,uint8_t data_length);
 HAL_StatusTypeDef rylr998_networkId(UART_HandleTypeDef *puartHandle, uint8_t networkId);
 HAL_StatusTypeDef rylr998_setAddress(UART_HandleTypeDef *puartHandle, uint16_t address);
@@ -21,5 +46,7 @@ HAL_StatusTypeDef rylr998_setBaudRate(UART_HandleTypeDef *puartHandle, uint32_t 
 HAL_StatusTypeDef rylr998_setBand(UART_HandleTypeDef *puartHandle, uint32_t frequency);
 HAL_StatusTypeDef rylr998_setCPIN(UART_HandleTypeDef *puartHandle, uint8_t *password);
 HAL_StatusTypeDef rylr998_setCRFOP(UART_HandleTypeDef *puartHandle, uint8_t CRFOP);
+
+HAL_StatusTypeDef rylr998_prase_reciver(UART_HandleTypeDef *puartHandle);
 
 #endif /* INC_RYLR998_H_ */

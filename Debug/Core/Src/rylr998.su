@@ -9,3 +9,7 @@
 ../Core/Src/rylr998.c:329:19:rylr998_setCPIN	32	static
 ../Core/Src/rylr998.c:365:19:rylr998_setCRFOP	32	static
 ../Core/Src/rylr998.c:400:19:rylr998_FACTORY	32	static
+../Core/Src/rylr998.c:429:9:rylr998_ReadInterruptFlag	8	static
+../Core/Src/rylr998.c:433:6:rylr998_SetInterruptFlag	16	static
+../Core/Src/rylr998.c:437:6:rylr998_ClearInterruptFlag	8	static
+../Core/Src/rylr998.c:442:19:rylr998_prase_reciver	16	static

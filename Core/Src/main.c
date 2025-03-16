@@ -26,6 +26,7 @@
 /* USER CODE BEGIN Includes */
 #include "rylr998.h"
 #include <string.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,8 +58,92 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint8_t tx_buff[]="\r\n";
-uint8_t rx_buff[32];
+
+
+
+/*void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+    if (huart->Instance == LPUART1) {
+        // Data has been received, process rx_buff
+    	HAL_UARTEx_ReceiveToIdle_DMA(&hlpuart1, rx_buff,5);
+        // You can now handle the received data here
+    }
+}*/
+
+
+uint8_t rx_buff[30];
+uint8_t count2 = 0;
+
+void process_rxBuff(uint16_t indx, uint16_t size) {
+
+	char temp[size-indx];
+
+	// Ensure we don't read past the buffer
+	uint8_t count = 0;
+while (count < size) {
+	    // Use modulo operation to wrap around rx_buff
+	    temp[count] = rx_buff[indx % sizeof(rx_buff)];
+
+	    // Increment indices
+	    //indx++;
+	    count++;
+	}
+
+
+
+
+    // Compare the received data with expected strings
+    if (memcmp(temp, "OK+\r\n", 5) == 0) {
+    	count2=count2 +1;
+    } else if (memcmp(temp, "+ERR=1\r\n", 8) == 0) {
+        // Handle +ERR=1
+    } else if (memcmp(temp, "+ERR=2\r\n", 8) == 0) {
+        // Handle +ERR=2
+    } else if (memcmp(temp, "+ERR=4\r\n", 8) == 0) {
+        // Handle +ERR=4
+    } else if (memcmp(temp, "+ERR=5\r\n", 8) == 0) {
+        // Handle +ERR=5
+    } else if (memcmp(temp, "+ERR=10\r\n", 9) == 0) {
+        // Handle +ERR=10
+    } else if (memcmp(temp, "+ERR=12\r\n", 9) == 0) {
+        // Handle +ERR=12
+    } else if (memcmp(temp, "+ERR=13\r\n", 9) == 0) {
+        // Handle +ERR=13
+    } else if (memcmp(temp, "+ERR=14\r\n", 9) == 0) {
+        // Handle +ERR=14
+    } else if (memcmp(temp, "+ERR=15\r\n", 9) == 0) {
+        // Handle +ERR=15
+    } else if (memcmp(temp, "+ERR=18\r\n", 9) == 0) {
+        // Handle +ERR=18
+    } else if (memcmp(temp, "+ERR=19\r\n", 9) == 0) {
+        // Handle +ERR=19
+    } else if (memcmp(temp, "+ERR=20\r\n", 9) == 0) {
+        // Handle +ERR=20
+    }
+}
+
+uint16_t indx = 0;
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size) {
+    // Disable DMA to avoid conflicts (if necessary)
+    //__HAL_DMA_DISABLE(huart->hdmarx);
+
+    // Process the received data
+    //process_rxBuff(indx, size);
+
+    // Update the index for the next chunk of data
+    indx = size;
+    // Re-enable DMA
+    //__HAL_DMA_ENABLE(huart->hdmarx);
+
+    // Restart DMA reception
+    HAL_UARTEx_ReceiveToIdle_DMA(huart, rx_buff, 30);
+}
+
+
+
+
+
+
 
 /* USER CODE END 0 */
 
@@ -98,19 +183,28 @@ int main(void)
   uint8_t data_to_send[]= "Hola";
 
   // HAL_UART_Transmit_DMA(&hlpuart1,tx_buff,strlen((char*)tx_buff));
-  HAL_UART_Receive_DMA(&hlpuart1, rx_buff, 32);
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_buff, 30);
+  /*if(rylr998_networkId(&hlpuart1,18)==HAL_OK){
+
+  }*/
+
+
+  /*
+  if(rylr998_sendData(&hlpuart1,0,(uint8_t*)&data_to_send,strlen((char*)data_to_send))==HAL_OK){
+  }
+*/
+
+ //rylr998_networkId(&hlpuart1,18);
+ //HAL_Delay(100);
+
+ // rylr998_setAddress(&hlpuart1,0);
+  //HAL_Delay(100);
+
+ // rylr998_setParameter(&hlpuart1,9,7,1,12);
+ // HAL_Delay(100);
+ /* Infinite loop */
   /* USER CODE END 2 */
-   rylr998_sendData(&hlpuart1,0,(uint8_t*)&data_to_send,strlen((char*)data_to_send)); //TODO verify that the buffer is fully send
-   HAL_Delay(100);
 
-   rylr998_networkId(&hlpuart1,18);
-   HAL_Delay(100);
-
-   rylr998_setAddress(&hlpuart1,0);
-   HAL_Delay(100);
-
-   rylr998_setParameter(&hlpuart1,9,7,1,12);
-   HAL_Delay(100);
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)

@@ -421,3 +421,24 @@ HAL_StatusTypeDef rylr998_FACTORY(UART_HandleTypeDef *puartHandle) {
     return ret;
 }
 
+
+
+
+uint8_t rylr_interrupt_flag = 0;
+
+uint8_t rylr998_ReadInterruptFlag(void) {
+    return rylr_interrupt_flag;
+}
+
+void rylr998_SetInterruptFlag(int) {
+    rylr_interrupt_flag = 1;
+}
+
+void rylr998_ClearInterruptFlag(void) {
+    rylr_interrupt_flag = 0;
+}
+
+
+HAL_StatusTypeDef rylr998_prase_reciver(UART_HandleTypeDef *puartHandle){
+
+}
