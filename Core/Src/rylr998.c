@@ -502,9 +502,11 @@ RYLR_RX_command_t rylr998_ResponseFind(uint8_t *rxBuffer)
 }
 
 
+RYLR_RX_data_t rx_packet;
 
 void rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
 {
+
 	static uint8_t aux_buff[32];
 	static uint8_t start_indx=0;
 	static uint8_t i;
@@ -535,18 +537,34 @@ void rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
                     // Handle RCV response
                 	/*Example: Module received the ID Address 50 send 5 bytes data,
                 	 * Content is HELLO string, RSSI is -99dBm, SNR is 40, It will show as below.
-                	 *  +RCV=50,5,HELLO,-99,40“\r\n
+                	 *  +RCV=50,5,HELLO,-99,40\r\n
                 	 */
 
-                	/*
-                	for (int i=4;i<data_size;i++){
-                		//first char should be "="
-                		uint8_t recived_address_counter;
-                		if(aux_buff[i] == '='){
-                			recived_address_counter++;
-                		}
+            	    char *token;
 
-*/
+
+            	    // Parse ID address
+            	    token = strtok(aux_buff, "=");  // Remove "+RCV="
+            	    token = strtok(NULL, ",");      // Get ID address
+            	    rx_packet.id = atoi(token);
+
+            	    // Parse byte count
+            	    token = strtok(NULL, ",");      // Get byte count
+            	    rx_packet.byte_count = atoi(token);
+
+            	    // Parse actual data
+            	    token = strtok(NULL, ",");
+            	    strncpy(rx_packet.data, token, rx_packet.byte_count);  // Copy up to byte_count
+            	    rx_packet.data[rx_packet.byte_count] = '\0';  // Ensure null termination
+
+            	    // Parse RSSI
+            	    token = strtok(NULL, ",");      // Get RSSI
+            	    rx_packet.rssi = atoi(token);
+
+            	    // Parse SNR
+            	    token = strtok(NULL, ",");      // Get SNR
+            	    rx_packet.snr = atoi(token);
+
 
 
 

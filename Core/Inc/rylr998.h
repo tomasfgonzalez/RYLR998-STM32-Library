@@ -39,7 +39,13 @@ typedef enum
 
 } RYLR_RX_command_t;
 
-
+typedef struct{
+	uint16_t id;
+	uint8_t byte_count;
+	uint8_t data[240];
+	int8_t rssi;
+	uint8_t snr;
+}RYLR_RX_data_t;
 
 
 typedef struct
@@ -52,6 +58,7 @@ typedef struct
 
 }RYLR_reciver_t;
 
+extern RYLR_RX_data_t rx_packet;
 extern RYLR_reciver_t rxDataBuff;
 
 //Tx
