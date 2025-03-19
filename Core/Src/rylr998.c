@@ -422,23 +422,155 @@ HAL_StatusTypeDef rylr998_FACTORY(UART_HandleTypeDef *puartHandle) {
 }
 
 
+uint8_t rylr998_interrupt_flag;
 
 
-uint8_t rylr_interrupt_flag = 0;
-
-uint8_t rylr998_ReadInterruptFlag(void) {
-    return rylr_interrupt_flag;
-}
-
-void rylr998_SetInterruptFlag(int) {
-    rylr_interrupt_flag = 1;
-}
-
-void rylr998_ClearInterruptFlag(void) {
-    rylr_interrupt_flag = 0;
+/**
+ * @brief  Sets IRQ flag whenever new data gets into gets recived in the Rx buffer
+ *
+ */
+void rylr998_SetInterruptFlag(void){
+	rylr998_interrupt_flag =1;
 }
 
 
-HAL_StatusTypeDef rylr998_prase_reciver(UART_HandleTypeDef *puartHandle){
 
+/**
+ * @brief  Returns the value of the flag
+ * @retval flag status
+ *
+ */
+uint8_t rylr998_GetInterruptFlag(void){
+	return rylr998_interrupt_flag;
 }
+
+
+/**
+ * @brief  Clear the IRQ flag
+ *
+ */
+void rylr998_ClearInterruptFlag(void){
+	rylr998_interrupt_flag =0;
+}
+
+
+
+
+
+
+
+
+/**
+ * @brief handles the response of the uart msg
+ * @params RxBuffer sorted
+ * @retval command selected
+ *
+ */
+RYLR_RX_command_t rylr998_ResponseFind(uint8_t *rxBuffer)
+{
+
+	RYLR_RX_command_t 	ret 					= RYLR_NOT_FOUND;
+	if(!memcmp(rxBuffer, "ADDRESS\r\n", 9))
+	{
+		return ret = RYLR_ADDRESS;
+	}
+	else if(!memcmp(rxBuffer, "+RCV", 4))
+	{
+		return ret = RYLR_RCV;
+	}
+	else if(!memcmp(rxBuffer, "OK+\r\n", 5))
+	{
+		return ret = RYLR_OK;
+	}
+	else if(!memcmp(rxBuffer, "+READY\r\n", 8))
+	{
+		return ret = RYLR_RDY;
+	}
+	else if(!memcmp(rxBuffer, "+ERR=", 5))
+	{
+		return ret = RYLR_ERR;
+	}
+	else if(!memcmp(rxBuffer, "+FACTORY\r\n", 10))
+	{
+		return ret = RYLR_FACTORY;
+	}
+	else if(!memcmp(rxBuffer, "+IPR=", 5))
+	{
+		return ret = RYLR_IPR;
+	}
+	return ret;
+}
+
+
+
+void rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
+{
+	static uint8_t aux_buff[32];
+	static uint8_t start_indx=0;
+	uint8_t i;
+	for (i == 0; i <RX_BUFFER_SIZE; i++){
+	    aux_buff[i] = pBuff[(start_indx + i) % RX_BUFFER_SIZE];
+	    if(aux_buff[i]=='\n'){
+	    	rylr998_ClearInterruptFlag();
+	    	break;
+	    }
+	    if(i==RX_BUFFER_SIZE && aux_buff[i]!='\n'){
+	    }
+
+
+	}
+	start_indx=(start_indx + i+1) % RX_BUFFER_SIZE;
+	i=0;
+
+
+
+            RYLR_RX_command_t cmd = rylr998_ResponseFind(aux_buff);
+
+            // Handle different cases
+            switch (cmd)
+            {
+                case RYLR_ADDRESS:
+                    // Handle ADDRESS response
+                    break;
+                case RYLR_RCV:
+                    // Handle RCV response
+                	/*Example: Module received the ID Address 50 send 5 bytes data,
+                	 * Content is HELLO string, RSSI is -99dBm, SNR is 40, It will show as below.
+                	 *  +RCV=50,5,HELLO,-99,40“\r\n
+                	 */
+
+                	/*
+                	for (int i=4;i<data_size;i++){
+                		//first char should be "="
+                		uint8_t recived_address_counter;
+                		if(aux_buff[i] == '='){
+                			recived_address_counter++;
+                		}
+
+*/
+
+
+
+
+
+
+                    break;
+                case RYLR_OK:
+                    // Handle OK response
+                    break;
+                case RYLR_RDY:
+                    // Handle READY response
+                    break;
+                case RYLR_ERR:
+
+                	while(1){  //TODO  for now, if something went wrong, the code gets stuck here.
+                		Error_Handler();
+                	}
+                	break;
+                default:
+                    break;
+            }
+
+            rylr998_ClearInterruptFlag();
+}
+

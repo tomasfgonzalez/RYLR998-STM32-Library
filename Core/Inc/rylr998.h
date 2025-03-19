@@ -22,6 +22,24 @@
  */
 
 
+typedef enum
+{
+	RYLR_OK = 0x00U,
+	RYLR_ADDRESS,
+	RYLR_RCV,
+	RYLR_RDY,
+	RYLR_IPR,
+	RYLR_UID,
+	RYLR_VER,
+	RYLR_FACTORY,
+	RYLR_RESET,
+	RYLR_READY,
+	RYLR_ERR,
+	RYLR_NOT_FOUND
+
+} RYLR_RX_command_t;
+
+
 
 
 typedef struct
@@ -36,6 +54,7 @@ typedef struct
 
 extern RYLR_reciver_t rxDataBuff;
 
+//Tx
 HAL_StatusTypeDef rylr998_sendData(UART_HandleTypeDef *uartHandle,uint16_t address, uint8_t *data,uint8_t data_length);
 HAL_StatusTypeDef rylr998_networkId(UART_HandleTypeDef *puartHandle, uint8_t networkId);
 HAL_StatusTypeDef rylr998_setAddress(UART_HandleTypeDef *puartHandle, uint16_t address);
@@ -47,6 +66,15 @@ HAL_StatusTypeDef rylr998_setBand(UART_HandleTypeDef *puartHandle, uint32_t freq
 HAL_StatusTypeDef rylr998_setCPIN(UART_HandleTypeDef *puartHandle, uint8_t *password);
 HAL_StatusTypeDef rylr998_setCRFOP(UART_HandleTypeDef *puartHandle, uint8_t CRFOP);
 
-HAL_StatusTypeDef rylr998_prase_reciver(UART_HandleTypeDef *puartHandle);
+
+//Rx
+void rylr998_prase_reciver(uint8_t *pBuff,uint8_t RX_BUFFER_SIZE);
+RYLR_RX_command_t rylr998_ResponseFind(uint8_t *rxBuffer);
+
+
+void rylr998_SetInterruptFlag(void);
+uint8_t rylr998_GetInterruptFlag(void);
+void rylr998_ClearInterruptFlag(void);
+
 
 #endif /* INC_RYLR998_H_ */
