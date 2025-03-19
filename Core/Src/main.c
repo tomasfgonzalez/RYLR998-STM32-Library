@@ -75,22 +75,23 @@ uint8_t rx_buff[RX_BUFFER_SIZE];  // Reception buffer
 
 
 
-
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
     // Check if the event is an idle line event
 
 	if((huart == &huart2)){
-		static last_index;
-		if (HAL_UARTEx_GetRxEventType(huart) == HAL_UART_RXEVENT_IDLE) {
-			rylr998_SetInterruptFlag();
-			HAL_UARTEx_ReceiveToIdle_DMA(huart, rx_buff, RX_BUFFER_SIZE);
-		}
 
-		if (HAL_UARTEx_GetRxEventType(huart) == HAL_UART_RXEVENT_TC){
-			//HAL_UARTEx_ReceiveToIdle_DMA(huart, rx_buff, RX_BUFFER_SIZE);
-			//__HAL_DMA_DISABLE_IT(&huart2,DMA_IT_HT);
-		}
+
+
+		//if (HAL_UARTEx_GetRxEventType(huart) == HAL_UART_RXEVENT_IDLE ||HAL_UARTEx_GetRxEventType(huart) == HAL_UART_RXEVENT_HT) {
+
+			if (rx_buff[Size-1]=='\n'){
+			rylr998_SetInterruptFlag();
+			}
+			HAL_UARTEx_ReceiveToIdle_DMA(huart, rx_buff, RX_BUFFER_SIZE);
+
+		//}
 	}
+
 }
 /* USER CODE END 0 */
 
@@ -134,7 +135,9 @@ int main(void)
 
 
   HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_buff, RX_BUFFER_SIZE);
- // __HAL_DMA_DISABLE_IT(&huart2,DMA_IT_HT);
+
+ // __HAL_DMA_DISABLE_IT(&hdma_usart2_rx,HAL_UART_RXEVENT_HT);
+
 
   /*if(rylr998_networkId(&hlpuart1,18)==HAL_OK){
 
@@ -161,6 +164,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
 	  if(rylr998_GetInterruptFlag()){
 
 

@@ -507,8 +507,8 @@ void rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
 {
 	static uint8_t aux_buff[32];
 	static uint8_t start_indx=0;
-	uint8_t i;
-	for (i == 0; i <RX_BUFFER_SIZE; i++){
+	static uint8_t i;
+	for (i = 0; i <RX_BUFFER_SIZE; i++){
 	    aux_buff[i] = pBuff[(start_indx + i) % RX_BUFFER_SIZE];
 	    if(aux_buff[i]=='\n'){
 	    	rylr998_ClearInterruptFlag();
@@ -516,7 +516,6 @@ void rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
 	    }
 	    if(i==RX_BUFFER_SIZE && aux_buff[i]!='\n'){
 	    }
-
 
 	}
 	start_indx=(start_indx + i+1) % RX_BUFFER_SIZE;
