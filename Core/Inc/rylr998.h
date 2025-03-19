@@ -69,7 +69,7 @@ HAL_StatusTypeDef rylr998_setParameter(UART_HandleTypeDef *puartHandle,uint8_t S
 HAL_StatusTypeDef rylr998_reset(UART_HandleTypeDef *puartHandle);
 HAL_StatusTypeDef rylr998_mode(UART_HandleTypeDef *puartHandle,uint8_t mode,uint32_t rxTime,uint32_t LowSpeedTime);
 HAL_StatusTypeDef rylr998_setBaudRate(UART_HandleTypeDef *puartHandle, uint32_t baudRate);
-HAL_StatusTypeDef rylr998_setBand(UART_HandleTypeDef *puartHandle, uint32_t frequency);
+HAL_StatusTypeDef rylr998_setBand(UART_HandleTypeDef *puartHandle, uint32_t frequency,uint8_t memory);
 HAL_StatusTypeDef rylr998_setCPIN(UART_HandleTypeDef *puartHandle, uint8_t *password);
 HAL_StatusTypeDef rylr998_setCRFOP(UART_HandleTypeDef *puartHandle, uint8_t CRFOP);
 

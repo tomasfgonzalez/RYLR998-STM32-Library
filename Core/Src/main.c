@@ -70,7 +70,7 @@ void SystemClock_Config(void);
 }*/
 
 
-#define RX_BUFFER_SIZE 32
+#define RX_BUFFER_SIZE 255
 uint8_t rx_buff[RX_BUFFER_SIZE];  // Reception buffer
 
 
@@ -136,32 +136,61 @@ int main(void)
 
   HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_buff, RX_BUFFER_SIZE);
 
- // __HAL_DMA_DISABLE_IT(&hdma_usart2_rx,HAL_UART_RXEVENT_HT);
+// __HAL_DMA_DISABLE_IT(&hdma_usart2_rx,HAL_UART_RXEVENT_HT);
 
+  if(!rylr998_networkId(&hlpuart1,18)==HAL_OK){
 
-  /*if(rylr998_networkId(&hlpuart1,18)==HAL_OK){
+  }
 
-  }*/
+ HAL_Delay(1000);
 
+ if(rylr998_setAddress(&hlpuart1,1234)==HAL_OK){
+ }
+
+ HAL_Delay(1000);
+
+if(rylr998_setParameter(&hlpuart1,11,7,1,12)==HAL_OK){
+  }
+
+HAL_Delay(1000);
+if(rylr998_reset(&hlpuart1)==HAL_OK){
+
+}
+
+HAL_Delay(1000);
+if(rylr998_mode(&hlpuart1,1,59999,50000)==HAL_OK){
+ }
+HAL_Delay(1000);
+if(rylr998_setBaudRate(&hlpuart1,115200)==HAL_OK){
+  }
+HAL_Delay(1000);
+if(rylr998_setBand(&hlpuart1,915000000,1)==HAL_OK){ //Saves it on flash
+
+}
+HAL_Delay(1000);
+if(rylr998_setBand(&hlpuart1,915000000,0)==HAL_OK){   // not on MEMORY
+
+}
+HAL_Delay(1000);
+if(rylr998_setCPIN(&hlpuart1,"TOMAS123")==HAL_OK){
+
+  }
 
   /*
   if(rylr998_sendData(&hlpuart1,0,(uint8_t*)&data_to_send,strlen((char*)data_to_send))==HAL_OK){
   }
-*/
 
- //rylr998_networkId(&hlpuart1,18);
- //HAL_Delay(100);
 
- // rylr998_setAddress(&hlpuart1,0);
-  //HAL_Delay(100);
+  if(rylr998_setCPIN(&hlpuart1,'TOMAS123')==HAL_OK){
 
- // rylr998_setParameter(&hlpuart1,9,7,1,12);
- // HAL_Delay(100);
- /* Infinite loop */
-  /* USER CODE END 2 */
+  }
+  if(rylr998_setCRFOP(&hlpuart1,22)==HAL_OK){
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+  }
+  if(rylr998_FACTORY(&hlpuart1)){
+
+  }*/
+
   while (1)
   {
 
@@ -170,9 +199,7 @@ int main(void)
 
 		  rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE);
 	  }
-    /* USER CODE BEGIN 3 */
   }
-  /* USER CODE END 3 */
 }
 
 /**
