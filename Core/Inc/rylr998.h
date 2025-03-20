@@ -78,7 +78,7 @@ HAL_StatusTypeDef rylr998_FACTORY(UART_HandleTypeDef *puartHandle);
 
 
 //Rx
-void rylr998_prase_reciver(uint8_t *pBuff,uint8_t RX_BUFFER_SIZE);
+RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff,uint8_t RX_BUFFER_SIZE);
 RYLR_RX_command_t rylr998_ResponseFind(uint8_t *rxBuffer);
 
 

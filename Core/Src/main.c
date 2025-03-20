@@ -60,6 +60,16 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 
 
+
+void LEDBlink(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin, uint32_t delay_ms) {
+    HAL_GPIO_TogglePin(GPIOx, GPIO_Pin);  // Toggle LED state
+    HAL_Delay(delay_ms);                  // Wait for the delay
+    HAL_GPIO_TogglePin(GPIOx, GPIO_Pin);  // Toggle LED back
+    HAL_Delay(delay_ms);                  // Wait again
+}
+
+
+
 #define RX_BUFFER_SIZE 255
 uint8_t rx_buff[RX_BUFFER_SIZE];  // Reception buffer
 
@@ -68,21 +78,129 @@ uint8_t rx_buff[RX_BUFFER_SIZE];  // Reception buffer
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
     // Check if the event is an idle line event
 
-	if((huart == &huart2)){
-
-
-
+	if((huart == &hlpuart1)){
 		//if (HAL_UARTEx_GetRxEventType(huart) == HAL_UART_RXEVENT_IDLE ||HAL_UARTEx_GetRxEventType(huart) == HAL_UART_RXEVENT_HT) {
 		//For some reason, the RXevent IDLE tends to not work right
 			if (rx_buff[Size-1]=='\n'){
 			rylr998_SetInterruptFlag();
 			}
 			HAL_UARTEx_ReceiveToIdle_DMA(huart, rx_buff, RX_BUFFER_SIZE);
+	}
+}
 
 
+
+
+
+
+void LoRa_modeHighPower(void){
+	//Reset to Factory CONFIG
+	if(rylr998_FACTORY(&hlpuart1)==HAL_OK){
+	while(1){
+			if(rylr998_GetInterruptFlag()){
+					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_FACTORY){
+						LEDBlink(GPIOB, GPIO_PIN_3, 1000);
+						break;
+					}
+				}
+			}
+		}
+
+
+	//NETWORKID
+	if(rylr998_networkId(&hlpuart1,18)==HAL_OK){
+		while(1){
+			if(rylr998_GetInterruptFlag()){
+				if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
+					LEDBlink(GPIOB, GPIO_PIN_3, 1000);
+					break;
+				}
+			}
+		}
+	}
+	//ADDRESS
+	if(rylr998_setAddress(&hlpuart1,1)==HAL_OK){  //ADDRESS of the device =1
+	while(1){
+			if(rylr998_GetInterruptFlag()){
+				if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
+					LEDBlink(GPIOB, GPIO_PIN_3, 1000);
+					break;
+				}
+			}
+		}
+	}
+	//PARAMETERS
+	if(rylr998_setParameter(&hlpuart1,9,7,1,12)==HAL_OK){ //SF = 9, BW= 125kHz, CR=1,Programed Preamble = 12 (MAX RANGE CONFIG, also the default factory settings)
+	while(1){
+			if(rylr998_GetInterruptFlag()){
+				if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
+					LEDBlink(GPIOB, GPIO_PIN_3, 1000);
+					break;
+				}
+			}
+		}
+	}
+	//MODE
+	if(rylr998_mode(&hlpuart1,0,0,0)==HAL_OK){  //MODE 1, normal
+	while(1){
+			if(rylr998_GetInterruptFlag()){
+				if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
+					LEDBlink(GPIOB, GPIO_PIN_3, 1000);
+					break;
+				}
+			}
+		}
+	}
+	//BAUD RATE
+	if(rylr998_setBaudRate(&hlpuart1,115200)==HAL_OK){
+	while(1){
+		if(rylr998_GetInterruptFlag()){
+				if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_IPR){
+					LEDBlink(GPIOB, GPIO_PIN_3, 1000);
+					break;
+				}
+			}
+		}
+	}
+	//FREQ Band on FLASH
+	if(rylr998_setBand(&hlpuart1,915000000,1)==HAL_OK){ //Saves it on flash
+	while(1){
+		if(rylr998_GetInterruptFlag()){
+				if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
+					LEDBlink(GPIOB, GPIO_PIN_3, 1000);
+					break;
+				}
+			}
+		}
+	}
+	//PASSWORD
+	char password[] = "FFFFFFFF";
+	if(rylr998_setCPIN(&hlpuart1,password)==HAL_OK){
+	while(1){
+		if(rylr998_GetInterruptFlag()){
+				if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
+					LEDBlink(GPIOB, GPIO_PIN_3, 1000);
+					break;
+				}
+			}
+		}
+	}
+	//RF Output Power must be set to less than AT+CRFOP=14 to comply CE certification.
+	if(rylr998_setCRFOP(&hlpuart1,22)==HAL_OK){
+	while(1){
+		if(rylr998_GetInterruptFlag()){
+				if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
+					LEDBlink(GPIOB, GPIO_PIN_3, 1000);
+					break;
+				}
+			}
+		}
 	}
 
+
 }
+
+
 /* USER CODE END 0 */
 
 /**
@@ -120,16 +238,12 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 
-  HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_buff, RX_BUFFER_SIZE);
+  HAL_UARTEx_ReceiveToIdle_DMA(&hlpuart1, rx_buff, RX_BUFFER_SIZE);
 
-  if(rylr998_networkId(&hlpuart1,18)==HAL_OK){
-	  while (1){
-	 	  if(rylr998_GetInterruptFlag()){
-	 		  rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE);
-	 		  break;
-	 	  }
-	   }
-  }
+
+  LoRa_modeHighPower();
+
+
 /* Example of usage: Start DMA Rx  -> Send command -> wait for HAL_OK -> look for IRQ flag
 	if(!rylr998_networkId(&hlpuart1,18)==HAL_OK){
 	}
@@ -148,7 +262,7 @@ int main(void)
 	}
 
 	HAL_Delay(1000);
-	if(rylr998_mode(&hlpuart1,1,59999,50000)==HAL_OK){
+	if(rylr998_mode(&hlpuart1,1,59999,00050)==HAL_OK){
 	}
 
 	HAL_Delay(1000);
@@ -173,7 +287,7 @@ int main(void)
 	}
 
 	HAL_Delay(1000);
-	if(rylr998_FACTORY(&hlpuart1)){
+	if(rylr998_FACTORY(&hlpuart1)==HAL_OK){
 	 }
 
 	HAL_Delay(1000);
@@ -185,11 +299,21 @@ int main(void)
 */
 
   while (1)
-  {
-	  if(rylr998_GetInterruptFlag()){
-		  rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE);
-	  }
-  }
+  {/*
+	  uint8_t data_to_send[]= "Hi";
+	   	if(rylr998_sendData(&hlpuart1,0,(uint8_t*)&data_to_send,strlen((char*)data_to_send))==HAL_OK){ //Confirm that UART transfer was successful
+	   	while(1){
+			  if(rylr998_GetInterruptFlag()){           //Check if the IRQ is completed
+				  if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
+						//  LEDBlink(GPIOB, GPIO_PIN_3, 500);
+						//  LEDBlink(GPIOB, GPIO_PIN_3, 500);
+						//  LEDBlink(GPIOB, GPIO_PIN_3, 500);
+						  break;
+				  }
+			  }
+	   	}
+}else{
+*/
 }
 
 /**

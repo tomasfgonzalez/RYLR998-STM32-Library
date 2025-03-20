@@ -81,7 +81,7 @@ HAL_StatusTypeDef rylr998_networkId(UART_HandleTypeDef *puartHandle, uint8_t net
 }
 
 /**
- * @brief  Sets the address for the RYLR998 module using the AT command.
+ * @brief  Sets the address for the RYLR998 module using the AT command. Saves in the FLASH
  * @param  puartHandle: Pointer to the UART handle used for communication.
  * @param  address: The address to be set on the RYLR998 module.
  * @retval HAL_StatusTypeDef: HAL_OK if the command is successfully transmitted, HAL_ERROR if memory allocation fails.
@@ -186,21 +186,28 @@ HAL_StatusTypeDef rylr998_mode(UART_HandleTypeDef *puartHandle, uint8_t mode, ui
     char uartTxBuffer[30] = {0};  //
 
     // Validate mode (0, 1, or 2)
-    if (mode > 2) {
-        return ret;
-    }
+
 
     // Validate rxTime and LowSpeedTime (must be between 30 and 60000)
-    if (rxTime < 30 || rxTime > 60000) {
-        return ret;
+    if (mode==2){
+		if (rxTime < 30 || rxTime > 60000) {
+			return ret;
+		}
+		if (LowSpeedTime < 30 || LowSpeedTime > 60000) {
+			return ret;
+		}
+    }else if(mode == 1 || mode==0){
+    }else {
+    	return ret;
     }
-    if (LowSpeedTime < 30 || LowSpeedTime > 60000) {
-        return ret;
-    }
-
     // Calculate required buffer size dynamically (AT+MODE=<mode>,<rxTime>,<LowSpeedTime>\r\n)
-    int packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+MODE=%u,%lu,%lu\r\n", mode, rxTime, LowSpeedTime);
+    int packetSize;
 
+    if (mode==1|| mode==0){
+    	 packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+MODE=%u\r\n", mode);
+    }else{
+    	 packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+MODE=2,%lu,%lu\r\n", rxTime, LowSpeedTime);
+    }
     // Allocate buffer
     if (packetSize <= 0 || packetSize >= sizeof(uartTxBuffer)) {
               return HAL_ERROR;  // snprintf error or buffer overflow prevention
@@ -275,9 +282,9 @@ HAL_StatusTypeDef rylr998_setBand(UART_HandleTypeDef *puartHandle, uint32_t freq
 
 
 /**
- * @brief  Sets the PIN for the RYLR998 module using the AT command.
+ * @brief  Sets the PIN for the RYLR998 module using the AT command
  * @param  puartHandle: Pointer to the UART handle used for communication.
- * @param  password: Pointer to the 8-character password to be set.
+ * @param  password: Pointer to the 8-character password to be set,  from 00000000 to FFFFFFFF
  * @retval HAL_StatusTypeDef: HAL_OK if the command is successfully transmitted, HAL_ERROR if the password length is invalid or memory allocation fails.
  *
  */
@@ -343,7 +350,7 @@ HAL_StatusTypeDef rylr998_setCRFOP(UART_HandleTypeDef *puartHandle, uint8_t CRFO
 HAL_StatusTypeDef rylr998_FACTORY(UART_HandleTypeDef *puartHandle) {
     HAL_StatusTypeDef ret = HAL_ERROR;
 
-    char uartTxBuffer[13] = {0};
+    char uartTxBuffer[12] = {0};
 
 
 	int packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+FACTORY\r\n");
@@ -442,12 +449,18 @@ RYLR_RX_command_t rylr998_ResponseFind(uint8_t *rxBuffer)
 
 RYLR_RX_data_t rx_packet;
 
-void rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
+RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
 {
 
 	static uint8_t aux_buff[255];
 	static uint8_t start_indx=0;
 	static uint8_t i;
+
+	if(pBuff[start_indx]=='\n'){   //RYLR_IPR returns +RYLR_IPR=115200\r\n\n for some reason so this fixes it
+									//TODO: improvement: search for the '+' in ASCII and then, save it in the aux_buff while keeping track of the index
+		start_indx=start_indx+1;
+	}
+
 	for (i = 0; i <RX_BUFFER_SIZE; i++){
 	    aux_buff[i] = pBuff[(start_indx + i) % RX_BUFFER_SIZE];
 	    if(aux_buff[i]=='\n'){
@@ -458,6 +471,7 @@ void rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
 	    }
 
 	}
+
 	start_indx=(start_indx + i+1) % RX_BUFFER_SIZE;
 	i=0;
 
@@ -521,5 +535,6 @@ void rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
             }
 
             rylr998_ClearInterruptFlag();
+            return cmd;
 }
 
