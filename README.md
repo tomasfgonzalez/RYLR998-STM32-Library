@@ -13,7 +13,6 @@ This repository provides a comprehensive library for interfacing with the **RYLR
 - STM32 microcontroller
 - **RYLR998 LoRa module** connected via UART1.
 
-## Installation:
-Clone this repository into your STM32 project and include the `rylr998.h` and `rylr998.c` files in your project.
-
+## Quickstart
+* Enable the DNA UART Rx in circular mode
 
