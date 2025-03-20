@@ -14,5 +14,5 @@ This repository provides a comprehensive library for interfacing with the **RYLR
 - **RYLR998 LoRa module** connected via UART1.
 
 ## Quickstart
-* Enable the DNA UART Rx in circular mode
+* Enable the DMA UART Rx in circular mode
 
