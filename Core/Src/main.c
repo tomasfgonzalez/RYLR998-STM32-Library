@@ -60,16 +60,6 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 
 
-
-/*void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-    if (huart->Instance == LPUART1) {
-        // Data has been received, process rx_buff
-    	HAL_UARTEx_ReceiveToIdle_DMA(&hlpuart1, rx_buff,5);
-        // You can now handle the received data here
-    }
-}*/
-
-
 #define RX_BUFFER_SIZE 255
 uint8_t rx_buff[RX_BUFFER_SIZE];  // Reception buffer
 
@@ -83,13 +73,13 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
 
 
 		//if (HAL_UARTEx_GetRxEventType(huart) == HAL_UART_RXEVENT_IDLE ||HAL_UARTEx_GetRxEventType(huart) == HAL_UART_RXEVENT_HT) {
-
+		//For some reason, the RXevent IDLE tends to not work right
 			if (rx_buff[Size-1]=='\n'){
 			rylr998_SetInterruptFlag();
 			}
 			HAL_UARTEx_ReceiveToIdle_DMA(huart, rx_buff, RX_BUFFER_SIZE);
 
-		//}
+
 	}
 
 }
@@ -128,75 +118,75 @@ int main(void)
   MX_LPUART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  uint8_t data_to_send[]= "Hola";
-
-  // HAL_UART_Transmit_DMA(&hlpuart1,tx_buff,strlen((char*)tx_buff));
-
 
 
   HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_buff, RX_BUFFER_SIZE);
 
-// __HAL_DMA_DISABLE_IT(&hdma_usart2_rx,HAL_UART_RXEVENT_HT);
-
-  if(!rylr998_networkId(&hlpuart1,18)==HAL_OK){
-
+  if(rylr998_networkId(&hlpuart1,18)==HAL_OK){
+	  while (1){
+	 	  if(rylr998_GetInterruptFlag()){
+	 		  rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE);
+	 		  break;
+	 	  }
+	   }
   }
+/* Example of usage: Start DMA Rx  -> Send command -> wait for HAL_OK -> look for IRQ flag
+	if(!rylr998_networkId(&hlpuart1,18)==HAL_OK){
+	}
 
- HAL_Delay(1000);
-
- if(rylr998_setAddress(&hlpuart1,1234)==HAL_OK){
- }
-
- HAL_Delay(1000);
-
-if(rylr998_setParameter(&hlpuart1,11,7,1,12)==HAL_OK){
-  }
-
-HAL_Delay(1000);
-if(rylr998_reset(&hlpuart1)==HAL_OK){
-
-}
-
-HAL_Delay(1000);
-if(rylr998_mode(&hlpuart1,1,59999,50000)==HAL_OK){
- }
-HAL_Delay(1000);
-if(rylr998_setBaudRate(&hlpuart1,115200)==HAL_OK){
-  }
-HAL_Delay(1000);
-if(rylr998_setBand(&hlpuart1,915000000,1)==HAL_OK){ //Saves it on flash
-
-}
-HAL_Delay(1000);
-if(rylr998_setBand(&hlpuart1,915000000,0)==HAL_OK){   // not on MEMORY
-
-}
-HAL_Delay(1000);
-if(rylr998_setCPIN(&hlpuart1,"TOMAS123")==HAL_OK){
-
-  }
-
-  /*
-  if(rylr998_sendData(&hlpuart1,0,(uint8_t*)&data_to_send,strlen((char*)data_to_send))==HAL_OK){
-  }
+	HAL_Delay(1000);
+	if(rylr998_setAddress(&hlpuart1,1234)==HAL_OK){
+	}
 
 
-  if(rylr998_setCPIN(&hlpuart1,'TOMAS123')==HAL_OK){
+	HAL_Delay(1000);
+	if(rylr998_setParameter(&hlpuart1,11,7,1,12)==HAL_OK){
+	}
 
-  }
-  if(rylr998_setCRFOP(&hlpuart1,22)==HAL_OK){
+	HAL_Delay(1000);
+	if(rylr998_reset(&hlpuart1)==HAL_OK){
+	}
 
-  }
-  if(rylr998_FACTORY(&hlpuart1)){
+	HAL_Delay(1000);
+	if(rylr998_mode(&hlpuart1,1,59999,50000)==HAL_OK){
+	}
 
-  }*/
+	HAL_Delay(1000);
+	if(rylr998_setBaudRate(&hlpuart1,115200)==HAL_OK){
+	}
+
+	HAL_Delay(1000);
+	if(rylr998_setBand(&hlpuart1,915000000,1)==HAL_OK){ //Saves it on flash
+	}
+
+	HAL_Delay(1000);
+	if(rylr998_setBand(&hlpuart1,915000000,0)==HAL_OK){   // not on MEMORY
+	}
+
+	HAL_Delay(1000);
+	char password[] = "TOMAS123";
+	if(rylr998_setCPIN(&hlpuart1,password)==HAL_OK){
+	}
+
+	HAL_Delay(1000);
+	if(rylr998_setCRFOP(&hlpuart1,22)==HAL_OK){
+	}
+
+	HAL_Delay(1000);
+	if(rylr998_FACTORY(&hlpuart1)){
+	 }
+
+	HAL_Delay(1000);
+	//Example : Send HELLO string to the Address 50, AT+SEND=50,5,HELLO
+	uint8_t data_to_send[]= "Hello World, im learning to use LoRa communication";
+	if(rylr998_sendData(&hlpuart1,0,(uint8_t*)&data_to_send,strlen((char*)data_to_send))==HAL_OK){
+	}
+
+*/
 
   while (1)
   {
-
 	  if(rylr998_GetInterruptFlag()){
-
-
 		  rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE);
 	  }
   }

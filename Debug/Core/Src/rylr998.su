@@ -7,10 +7,10 @@
 ../Core/Src/rylr998.c:220:19:rylr998_setBaudRate	48	static
 ../Core/Src/rylr998.c:248:19:rylr998_setBand	64	static
 ../Core/Src/rylr998.c:284:19:rylr998_setCPIN	56	static
-../Core/Src/rylr998.c:310:19:rylr998_setCRFOP	32	static
-../Core/Src/rylr998.c:345:19:rylr998_FACTORY	32	static
-../Core/Src/rylr998.c:377:6:rylr998_SetInterruptFlag	8	static
-../Core/Src/rylr998.c:388:9:rylr998_GetInterruptFlag	8	static
-../Core/Src/rylr998.c:397:6:rylr998_ClearInterruptFlag	8	static
-../Core/Src/rylr998.c:414:19:rylr998_ResponseFind	32	static
-../Core/Src/rylr998.c:452:6:rylr998_prase_reciver	32	static
+../Core/Src/rylr998.c:315:19:rylr998_setCRFOP	48	static
+../Core/Src/rylr998.c:343:19:rylr998_FACTORY	48	static
+../Core/Src/rylr998.c:370:6:rylr998_SetInterruptFlag	8	static
+../Core/Src/rylr998.c:381:9:rylr998_GetInterruptFlag	8	static
+../Core/Src/rylr998.c:390:6:rylr998_ClearInterruptFlag	8	static
+../Core/Src/rylr998.c:407:19:rylr998_ResponseFind	32	static
+../Core/Src/rylr998.c:445:6:rylr998_prase_reciver	32	static

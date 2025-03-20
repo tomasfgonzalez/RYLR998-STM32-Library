@@ -281,24 +281,29 @@ HAL_StatusTypeDef rylr998_setBand(UART_HandleTypeDef *puartHandle, uint32_t freq
  * @retval HAL_StatusTypeDef: HAL_OK if the command is successfully transmitted, HAL_ERROR if the password length is invalid or memory allocation fails.
  *
  */
-HAL_StatusTypeDef rylr998_setCPIN(UART_HandleTypeDef *puartHandle, uint8_t *password) {
+HAL_StatusTypeDef rylr998_setCPIN(UART_HandleTypeDef *puartHandle, const char *password) {
     HAL_StatusTypeDef ret = HAL_ERROR;
-    char uartTxBuffer[20] = {0};
-    // Validate password length (should be 8 characters)
-    if (strlen((char*)password) != 8) {
-        return ret;  // Invalid password length
+    char uartTxBuffer[24] = {0};  // Aumenté el tamaño para mayor seguridad
+
+
+    if (password == NULL || strlen(password) != 8) {
+        return ret;
     }
 
+    // Formatear el comando AT
     int packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+CPIN=%s\r\n", password);
 
-  	if (packetSize <= 0 || packetSize >= sizeof(uartTxBuffer)) {
-  		return HAL_ERROR;  // snprintf error or overflow prevention
-  	}
+    // Verificar si snprintf tuvo un error o si hubo un desbordamiento
+    if (packetSize <= 0 || packetSize >= sizeof(uartTxBuffer)) {
+        return HAL_ERROR;
+    }
 
-  	ret = HAL_UART_Transmit(puartHandle, (uint8_t*)uartTxBuffer, packetSize, 10);
+    // Enviar el comando AT por UART
+    ret = HAL_UART_Transmit(puartHandle, (uint8_t*)uartTxBuffer, packetSize, 100);
 
-  	return ret;
+    return ret;
 }
+
 
 /**
  * @brief  Sets the CRFOP (Coding Rate and Frequency Offset) value for the RYLR998 module using the AT command.
@@ -309,31 +314,24 @@ HAL_StatusTypeDef rylr998_setCPIN(UART_HandleTypeDef *puartHandle, uint8_t *pass
  */
 HAL_StatusTypeDef rylr998_setCRFOP(UART_HandleTypeDef *puartHandle, uint8_t CRFOP){ //TODO check if it works
 	    HAL_StatusTypeDef ret = HAL_ERROR;
-
+	    char uartTxBuffer[14] = {0};
 	    if(CRFOP>22){
 	    	return ret;
 	    }
 
-	    // Calculate required buffer size dynamically
-	    uint16_t packetSize = snprintf(NULL, 0, "AT+CRFOP=%u\r\n", CRFOP) + 1;
+
+	    int packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+CRFOP=%u\r\n", CRFOP);
 
 
-	    // Allocate buffer
-	    uint8_t *uartTxBuffer = (uint8_t *)malloc(packetSize);
-	    if (uartTxBuffer == NULL) {
-	        return HAL_ERROR;  // Memory allocation failed
-	    }
 
-	    // Construct the AT command
-	    snprintf((char*)uartTxBuffer, packetSize, "AT+CRFOP=%u\r\n", CRFOP);
 
-	    // Transmit the command over UART
-	    ret = HAL_UART_Transmit_DMA(puartHandle, uartTxBuffer, packetSize - 1);  // -1 to exclude null terminator
+	  	if (packetSize <= 0 || packetSize >= sizeof(uartTxBuffer)) {
+	  		return HAL_ERROR;  // snprintf error or overflow prevention
+	  	}
 
-	    // Free allocated memory
-	    free(uartTxBuffer);
+	  	ret = HAL_UART_Transmit(puartHandle, (uint8_t*)uartTxBuffer, packetSize, 10);
 
-	    return ret;
+	  	return ret;
 }
 
 /**
@@ -345,25 +343,20 @@ HAL_StatusTypeDef rylr998_setCRFOP(UART_HandleTypeDef *puartHandle, uint8_t CRFO
 HAL_StatusTypeDef rylr998_FACTORY(UART_HandleTypeDef *puartHandle) {
     HAL_StatusTypeDef ret = HAL_ERROR;
 
-    // Calculate required buffer size dynamically
-    uint16_t packetSize = snprintf(NULL, 0, "AT+FACTORY\r\n") + 1;
+    char uartTxBuffer[13] = {0};
 
-    // Allocate buffer
-    uint8_t *uartTxBuffer = (uint8_t *)malloc(packetSize);
-    if (uartTxBuffer == NULL) {
-        return HAL_ERROR;  // Memory allocation failed
-    }
 
-    // Construct the AT command
-    snprintf((char*)uartTxBuffer, packetSize, "AT+FACTORY\r\n");
+	int packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+FACTORY\r\n");
 
-    // Transmit the command over UART
-    ret = HAL_UART_Transmit_DMA(puartHandle, uartTxBuffer, packetSize - 1);  // -1 to exclude null terminator
 
-    // Free allocated memory
-    free(uartTxBuffer);
+	if (packetSize < 0 || packetSize >= sizeof(uartTxBuffer)) {
+		return HAL_ERROR;
+	}
 
-    return ret;
+
+	ret = HAL_UART_Transmit(puartHandle, (uint8_t*)uartTxBuffer, packetSize, 10);
+
+	return ret;
 }
 
 
@@ -423,7 +416,7 @@ RYLR_RX_command_t rylr998_ResponseFind(uint8_t *rxBuffer)
 	{
 		return ret = RYLR_RCV;
 	}
-	else if(!memcmp(rxBuffer, "OK+\r\n", 5))
+	else if(!memcmp(rxBuffer, "+OK\r\n", 5))
 	{
 		return ret = RYLR_OK;
 	}

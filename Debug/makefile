@@ -60,8 +60,8 @@ all: main-build
 main-build: rylr998_stm32.elf secondary-outputs
 
 # Tool invocations
-rylr998_stm32.elf rylr998_stm32.map: $(OBJS) $(USER_OBJS) C:\Users\tomas\OneDrive\Escritorio\Final\ Proyect\GitHub\RYLR998-STM32-Library\STM32L031K6TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "rylr998_stm32.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\tomas\OneDrive\Escritorio\Final Proyect\GitHub\RYLR998-STM32-Library\STM32L031K6TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="rylr998_stm32.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+rylr998_stm32.elf rylr998_stm32.map: $(OBJS) $(USER_OBJS) C:\Users\GAby\Desktop\GitHub-Page\RYLR998-STM32-Library\STM32L031K6TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "rylr998_stm32.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\GAby\Desktop\GitHub-Page\RYLR998-STM32-Library\STM32L031K6TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="rylr998_stm32.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
