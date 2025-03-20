@@ -62,33 +62,23 @@ HAL_StatusTypeDef rylr998_sendData(UART_HandleTypeDef *puartHandle, uint16_t add
  */
 HAL_StatusTypeDef rylr998_networkId(UART_HandleTypeDef *puartHandle, uint8_t networkId) {
     HAL_StatusTypeDef ret = HAL_ERROR;
+    char uartTxBuffer[20] = {0};  // Enough for "AT+NETWORKID=XX\r\n"
 
-    // Validate network ID (Allowed: 3-15, 18)
-     if (networkId < 3 || networkId == 16 || networkId == 17 || networkId > 18) {
-         return ret;  // Invalid network ID, return error
-     }
+    // Validate the network ID
+    if (((networkId >= 3) && (networkId <= 15)) || (networkId == 18)) {
+        // Construct the AT command
+        int packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+NETWORKID=%u\r\n", networkId);
 
-    // Calculate required buffer size dynamically
-    uint16_t packetSize = snprintf(NULL, 0, "AT+NETWORKID=%u\r\n", networkId) + 1;
+        if (packetSize <= 0 || packetSize >= sizeof(uartTxBuffer)) {
+            return HAL_ERROR;  // snprintf error or buffer overflow prevention
+        }
 
-    // Allocate buffer
-    uint8_t *uartTxBuffer = (uint8_t *)malloc(packetSize);
-    if (uartTxBuffer == NULL) {
-        return HAL_ERROR;  // Memory allocation failed
+        // Transmit the AT command over UART
+        ret = HAL_UART_Transmit(puartHandle, (uint8_t*)uartTxBuffer, packetSize, 10);
     }
-
-    // Construct the AT command
-    snprintf((char*)uartTxBuffer, packetSize, "AT+NETWORKID=%u\r\n", networkId);
-
-    // Transmit the command over UART
-    ret = HAL_UART_Transmit_DMA(puartHandle, uartTxBuffer, packetSize - 1);  // -1 to exclude null terminator
-
-    // Free allocated memory
-    free(uartTxBuffer);
 
     return ret;
 }
-
 
 /**
  * @brief  Sets the address for the RYLR998 module using the AT command.
@@ -99,24 +89,17 @@ HAL_StatusTypeDef rylr998_networkId(UART_HandleTypeDef *puartHandle, uint8_t net
  */
 HAL_StatusTypeDef rylr998_setAddress(UART_HandleTypeDef *puartHandle, uint16_t address){
 	    HAL_StatusTypeDef ret = HAL_ERROR;
-
-	    // Calculate required buffer size dynamically
-	    uint16_t packetSize = snprintf(NULL, 0, "AT+ADDRESS=%u\r\n", address) + 1;
-
-	    // Allocate buffer
-	    uint8_t *uartTxBuffer = (uint8_t *)malloc(packetSize);
-	    if (uartTxBuffer == NULL) {
-	        return HAL_ERROR;  // Memory allocation failed
-	    }
+	    char uartTxBuffer[20] = {0};  // Enough size for "AT+ADDRESS=XXXXX\n"
 
 	    // Construct the AT command
-	    snprintf((char*)uartTxBuffer, packetSize, "AT+ADDRESS=%u\r\n", address);
+	    int packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+ADDRESS=%u\r\n", address);
 
-	    // Transmit the command over UART
-	    ret = HAL_UART_Transmit_DMA(puartHandle, uartTxBuffer, packetSize - 1);  // -1 to exclude null terminator
+	    if (packetSize <= 0 || packetSize >= sizeof(uartTxBuffer)) {
+	        return HAL_ERROR;  // snprintf error or overflow prevention
+	    }
 
-	    // Free allocated memory
-	    free(uartTxBuffer);
+	    // Transmit the AT command over UART
+	    ret = HAL_UART_Transmit(puartHandle, (uint8_t*)uartTxBuffer, packetSize, 10);
 
 	    return ret;
 }
@@ -131,41 +114,38 @@ HAL_StatusTypeDef rylr998_setAddress(UART_HandleTypeDef *puartHandle, uint16_t a
  * @retval HAL_StatusTypeDef: HAL_OK if the command is successfully transmitted, HAL_ERROR if validation fails or memory allocation fails.
  *
  */
-HAL_StatusTypeDef rylr998_setParameter(UART_HandleTypeDef *puartHandle,uint8_t SF,uint8_t BW,uint8_t CR,uint8_t ProgramedPreamble){
-	 HAL_StatusTypeDef ret = HAL_ERROR;
-	 	 	if(SF<5 ||SF>11){
-	 	 		return ret;
-	 	 	}
-	 	 	if(BW<7||BW>9){
-	 	 		return ret;
-	 	 	}
-	 	 	if(CR<1||CR>4){
-	 	 		return ret;
-	 	 	}
-	 	 	if(ProgramedPreamble<4 || ProgramedPreamble>25){
-	 	 		return ret;
-	 	 	}
-		    // Calculate required buffer size dynamically
-		    uint16_t packetSize = snprintf(NULL, 0, "AT+PARAMETER=%u,%u,%u,%u\r\n", SF,BW,CR,ProgramedPreamble) + 1;
+HAL_StatusTypeDef rylr998_setParameter(UART_HandleTypeDef *puartHandle, uint8_t SF, uint8_t BW, uint8_t CR, uint8_t ProgramedPreamble) {
+    HAL_StatusTypeDef ret = HAL_ERROR;
+    char uartTxBuffer[25] = {0};  // Enough size for "AT+PARAMETER=%u,%u,%u,%u\r\n"
 
-		    // Allocate buffer
-		    uint8_t *uartTxBuffer = (uint8_t *)malloc(packetSize);
-		    if (uartTxBuffer == NULL) {
-		        return HAL_ERROR;  // Memory allocation failed
-		    }
+    // Validate parameters
+    if (SF < 5 || SF > 11) {
+        return HAL_ERROR;  // Invalid Spreading Factor
+    }
+    if (BW < 7 || BW > 9) {
+        return HAL_ERROR;  // Invalid Bandwidth
+    }
+    if (CR < 1 || CR > 4) {
+        return HAL_ERROR;  // Invalid Coding Rate
+    }
+    if (ProgramedPreamble < 4 || ProgramedPreamble > 25) {
+        return HAL_ERROR;  // Invalid Preamble Length
+    }
 
-		    // Construct the AT command
-		    snprintf((char*)uartTxBuffer, packetSize, "AT+PARAMETER=%u,%u,%u,%u\r\n", SF,BW,CR,ProgramedPreamble);
+    // Calculate the required buffer size
+    int packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+PARAMETER=%u,%u,%u,%u\r\n", SF, BW, CR, ProgramedPreamble);
 
-		    // Transmit the command over UART
-		    ret = HAL_UART_Transmit_DMA(puartHandle, uartTxBuffer, packetSize - 1);  // -1 to exclude null terminator
+    // Ensure the packet size does not exceed the buffer size
+    if (packetSize >= sizeof(uartTxBuffer)) {
+        return HAL_ERROR;  // Buffer size exceeded
+    }
 
-		    // Free allocated memory
-		    free(uartTxBuffer);
+    // Transmit the command over UART
+    ret = HAL_UART_Transmit(puartHandle, (uint8_t*)uartTxBuffer, packetSize, 10);
 
-		    return ret;
-
+    return ret;
 }
+
 
 /**
  * @brief  Resets the RYLR998 module using the AT+RESET command.
@@ -173,29 +153,22 @@ HAL_StatusTypeDef rylr998_setParameter(UART_HandleTypeDef *puartHandle,uint8_t S
  * @retval HAL_StatusTypeDef: HAL_OK if the reset command is successfully transmitted, HAL_ERROR if memory allocation fails.
  *
  */
-HAL_StatusTypeDef rylr998_reset(UART_HandleTypeDef *puartHandle) { //TODO check if it works
-    HAL_StatusTypeDef ret = HAL_ERROR;
+HAL_StatusTypeDef rylr998_reset(UART_HandleTypeDef *puartHandle) {
+	  HAL_StatusTypeDef ret = HAL_ERROR;
+	    char uartTxBuffer[11] = {0};  // Enough size for "AT+RESET\r\n"
 
-    // Define the AT command
-    const char *resetCmd = "AT+RESET\r\n";
-    uint16_t packetSize = strlen(resetCmd);
+	    // Construct the AT command and check for formatting errors or overflow
+	    int packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+RESET\r\n");
 
-    // Allocate buffer
-    uint8_t *uartTxBuffer = (uint8_t *)malloc(packetSize);
-    if (uartTxBuffer == NULL) {
-        return HAL_ERROR;  // Memory allocation failed
-    }
+	    // Check if snprintf failed or if packetSize is larger than the buffer
+	    if (packetSize < 0 || packetSize >= sizeof(uartTxBuffer)) {
+	        return HAL_ERROR;  // snprintf error or buffer overflow
+	    }
 
-    // Copy command into the buffer
-    memcpy(uartTxBuffer, resetCmd, packetSize);
+	    // Transmit the AT command over UART
+	    ret = HAL_UART_Transmit(puartHandle, (uint8_t*)uartTxBuffer, packetSize, 10);
 
-    // Transmit the command over UART
-    ret = HAL_UART_Transmit_DMA(puartHandle, uartTxBuffer, packetSize);
-
-    // Free allocated memory
-    free(uartTxBuffer);
-
-    return ret;
+	    return ret;
 }
 
 
@@ -210,6 +183,7 @@ HAL_StatusTypeDef rylr998_reset(UART_HandleTypeDef *puartHandle) { //TODO check 
  */
 HAL_StatusTypeDef rylr998_mode(UART_HandleTypeDef *puartHandle, uint8_t mode, uint32_t rxTime, uint32_t LowSpeedTime) {//TODO check if it works
     HAL_StatusTypeDef ret = HAL_ERROR;
+    char uartTxBuffer[30] = {0};  //
 
     // Validate mode (0, 1, or 2)
     if (mode > 2) {
@@ -225,24 +199,15 @@ HAL_StatusTypeDef rylr998_mode(UART_HandleTypeDef *puartHandle, uint8_t mode, ui
     }
 
     // Calculate required buffer size dynamically (AT+MODE=<mode>,<rxTime>,<LowSpeedTime>\r\n)
-    uint16_t packetSize = snprintf(NULL, 0, "AT+MODE=%u,%lu,%lu\r\n", mode, rxTime, LowSpeedTime) + 1;
+    int packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+MODE=%u,%lu,%lu\r\n", mode, rxTime, LowSpeedTime);
 
     // Allocate buffer
-    uint8_t *uartTxBuffer = (uint8_t *)malloc(packetSize);
-    if (uartTxBuffer == NULL) {
-        return HAL_ERROR;  // Memory allocation failed
-    }
+    if (packetSize <= 0 || packetSize >= sizeof(uartTxBuffer)) {
+              return HAL_ERROR;  // snprintf error or buffer overflow prevention
+          }
 
-    // Construct the AT command with proper formatting
-    snprintf((char*)uartTxBuffer, packetSize, "AT+MODE=%u,%lu,%lu\r\n", mode, rxTime, LowSpeedTime);
-
-    // Transmit the command over UART
-    ret = HAL_UART_Transmit_DMA(puartHandle, uartTxBuffer, packetSize - 1);  // -1 to exclude null terminator
-
-    // Free allocated memory
-    free(uartTxBuffer);
-
-    return ret;
+     ret = HAL_UART_Transmit(puartHandle, (uint8_t*)uartTxBuffer, packetSize, 10);
+     return ret;
 }
 
 /**
@@ -254,32 +219,24 @@ HAL_StatusTypeDef rylr998_mode(UART_HandleTypeDef *puartHandle, uint8_t mode, ui
  */
 HAL_StatusTypeDef rylr998_setBaudRate(UART_HandleTypeDef *puartHandle, uint32_t baudRate) { //TODO check if it works
     HAL_StatusTypeDef ret = HAL_ERROR;
+    char uartTxBuffer[16] = {0};
 
     // Validate baud rate (optional - ensure it's a standard value)
     if (baudRate < 1200 || baudRate > 115200) {  // Adjust based on RYLR998 support
         return HAL_ERROR;  // Invalid baud rate
     }
 
-    // Calculate required buffer size dynamically
-    uint16_t packetSize = snprintf(NULL, 0, "AT+IPR=%lu\r\n", baudRate) + 1;
+    int packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+IPR=%lu\r\n", baudRate);
 
-    // Allocate buffer
-    uint8_t *uartTxBuffer = (uint8_t *)malloc(packetSize);
-    if (uartTxBuffer == NULL) {
-        return HAL_ERROR;  // Memory allocation failed
-    }
+	if (packetSize <= 0 || packetSize >= sizeof(uartTxBuffer)) {
+		return HAL_ERROR;  // snprintf error or overflow prevention
+	}
 
-    // Construct the AT command
-    snprintf((char*)uartTxBuffer, packetSize, "AT+IPR=%lu\r\n", baudRate);
+	ret = HAL_UART_Transmit(puartHandle, (uint8_t*)uartTxBuffer, packetSize, 10);
 
-    // Transmit the command over UART
-    ret = HAL_UART_Transmit_DMA(puartHandle, uartTxBuffer, packetSize - 1);  // -1 to exclude null terminator
-
-    // Free allocated memory
-    free(uartTxBuffer);
-
-    return ret;
+	return ret;
 }
+
 
 /**
  * @brief  Sets the frequency band for the RYLR998 module using the AT command.
@@ -288,33 +245,31 @@ HAL_StatusTypeDef rylr998_setBaudRate(UART_HandleTypeDef *puartHandle, uint32_t 
  * @retval HAL_StatusTypeDef: HAL_OK if the command is successfully transmitted, HAL_ERROR if the frequency is invalid or memory allocation fails.
  *
  */
-HAL_StatusTypeDef rylr998_setBand(UART_HandleTypeDef *puartHandle, uint32_t frequency) { //TODO check if it works
+HAL_StatusTypeDef rylr998_setBand(UART_HandleTypeDef *puartHandle, uint32_t frequency,uint8_t memory) { //TODO check if it works
     HAL_StatusTypeDef ret = HAL_ERROR;
+    char uartTxBuffer[22] = {0};
+    int packetSize=0;
 
     // Validate frequency (adjust based on RYLR998 supported bands)
     if (frequency < 862000000 || frequency > 1020000000) {
         return HAL_ERROR;  // Invalid frequency
     }
 
-    // Calculate required buffer size dynamically
-    uint16_t packetSize = snprintf(NULL, 0, "AT+BAND=%lu\r\n", frequency) + 1;
-
-    // Allocate buffer
-    uint8_t *uartTxBuffer = (uint8_t *)malloc(packetSize);
-    if (uartTxBuffer == NULL) {
-        return HAL_ERROR;  // Memory allocation failed
+    // Construct the AT command and check for formatting errors or overflow
+    if(memory){
+	packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+BAND=%lu,M\r\n",frequency);
+    }else{
+    packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+BAND=%lu\r\n",frequency);
     }
 
-    // Construct the AT command
-    snprintf((char*)uartTxBuffer, packetSize, "AT+BAND=%lu\r\n", frequency);
+	if (packetSize < 0 || packetSize >= sizeof(uartTxBuffer)) {
+		return HAL_ERROR;  // snprintf error or buffer overflow
+	}
 
-    // Transmit the command over UART
-    ret = HAL_UART_Transmit_DMA(puartHandle, uartTxBuffer, packetSize - 1);  // -1 to exclude null terminator
+	// Transmit the AT command over UART
+	ret = HAL_UART_Transmit(puartHandle, (uint8_t*)uartTxBuffer, packetSize, 10);
 
-    // Free allocated memory
-    free(uartTxBuffer);
-
-    return ret;
+	return ret;
 }
 
 
@@ -326,34 +281,29 @@ HAL_StatusTypeDef rylr998_setBand(UART_HandleTypeDef *puartHandle, uint32_t freq
  * @retval HAL_StatusTypeDef: HAL_OK if the command is successfully transmitted, HAL_ERROR if the password length is invalid or memory allocation fails.
  *
  */
-HAL_StatusTypeDef rylr998_setCPIN(UART_HandleTypeDef *puartHandle, uint8_t *password) { //TODO check if it works
+HAL_StatusTypeDef rylr998_setCPIN(UART_HandleTypeDef *puartHandle, const char *password) {
     HAL_StatusTypeDef ret = HAL_ERROR;
+    char uartTxBuffer[24] = {0};  // Aumenté el tamaño para mayor seguridad
 
-    // Validate password length (should be 8 characters)
-    if (strlen((char*)password) != 8) {
-        return ret;  // Invalid password length
+
+    if (password == NULL || strlen(password) != 8) {
+        return ret;
     }
 
-    // Calculate the required buffer size for the AT command (AT+CPIN=<password>\r\n)
-    uint16_t packetSize = snprintf(NULL, 0, "AT+CPIN=%s\r\n", password) + 1;
+    // Formatear el comando AT
+    int packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+CPIN=%s\r\n", password);
 
-    // Allocate buffer dynamically
-    uint8_t *uartTxBuffer = (uint8_t *)malloc(packetSize);
-    if (uartTxBuffer == NULL) {
-        return HAL_ERROR;  // Memory allocation failed
+    // Verificar si snprintf tuvo un error o si hubo un desbordamiento
+    if (packetSize <= 0 || packetSize >= sizeof(uartTxBuffer)) {
+        return HAL_ERROR;
     }
 
-    // Construct the AT command
-    snprintf((char*)uartTxBuffer, packetSize, "AT+CPIN=%s\r\n", password);
-
-    // Transmit command over UART using DMA
-    ret = HAL_UART_Transmit_DMA(puartHandle, uartTxBuffer, packetSize - 1);  // Exclude null terminator
-
-    // Free allocated memory
-    free(uartTxBuffer);
+    // Enviar el comando AT por UART
+    ret = HAL_UART_Transmit(puartHandle, (uint8_t*)uartTxBuffer, packetSize, 100);
 
     return ret;
 }
+
 
 /**
  * @brief  Sets the CRFOP (Coding Rate and Frequency Offset) value for the RYLR998 module using the AT command.
@@ -364,31 +314,24 @@ HAL_StatusTypeDef rylr998_setCPIN(UART_HandleTypeDef *puartHandle, uint8_t *pass
  */
 HAL_StatusTypeDef rylr998_setCRFOP(UART_HandleTypeDef *puartHandle, uint8_t CRFOP){ //TODO check if it works
 	    HAL_StatusTypeDef ret = HAL_ERROR;
-
+	    char uartTxBuffer[14] = {0};
 	    if(CRFOP>22){
 	    	return ret;
 	    }
 
-	    // Calculate required buffer size dynamically
-	    uint16_t packetSize = snprintf(NULL, 0, "AT+CRFOP=%u\r\n", CRFOP) + 1;
+
+	    int packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+CRFOP=%u\r\n", CRFOP);
 
 
-	    // Allocate buffer
-	    uint8_t *uartTxBuffer = (uint8_t *)malloc(packetSize);
-	    if (uartTxBuffer == NULL) {
-	        return HAL_ERROR;  // Memory allocation failed
-	    }
 
-	    // Construct the AT command
-	    snprintf((char*)uartTxBuffer, packetSize, "AT+CRFOP=%u\r\n", CRFOP);
 
-	    // Transmit the command over UART
-	    ret = HAL_UART_Transmit_DMA(puartHandle, uartTxBuffer, packetSize - 1);  // -1 to exclude null terminator
+	  	if (packetSize <= 0 || packetSize >= sizeof(uartTxBuffer)) {
+	  		return HAL_ERROR;  // snprintf error or overflow prevention
+	  	}
 
-	    // Free allocated memory
-	    free(uartTxBuffer);
+	  	ret = HAL_UART_Transmit(puartHandle, (uint8_t*)uartTxBuffer, packetSize, 10);
 
-	    return ret;
+	  	return ret;
 }
 
 /**
@@ -400,24 +343,183 @@ HAL_StatusTypeDef rylr998_setCRFOP(UART_HandleTypeDef *puartHandle, uint8_t CRFO
 HAL_StatusTypeDef rylr998_FACTORY(UART_HandleTypeDef *puartHandle) {
     HAL_StatusTypeDef ret = HAL_ERROR;
 
-    // Calculate required buffer size dynamically
-    uint16_t packetSize = snprintf(NULL, 0, "AT+FACTORY\r\n") + 1;
+    char uartTxBuffer[13] = {0};
 
-    // Allocate buffer
-    uint8_t *uartTxBuffer = (uint8_t *)malloc(packetSize);
-    if (uartTxBuffer == NULL) {
-        return HAL_ERROR;  // Memory allocation failed
-    }
 
-    // Construct the AT command
-    snprintf((char*)uartTxBuffer, packetSize, "AT+FACTORY\r\n");
+	int packetSize = snprintf(uartTxBuffer, sizeof(uartTxBuffer), "AT+FACTORY\r\n");
 
-    // Transmit the command over UART
-    ret = HAL_UART_Transmit_DMA(puartHandle, uartTxBuffer, packetSize - 1);  // -1 to exclude null terminator
 
-    // Free allocated memory
-    free(uartTxBuffer);
+	if (packetSize < 0 || packetSize >= sizeof(uartTxBuffer)) {
+		return HAL_ERROR;
+	}
 
-    return ret;
+
+	ret = HAL_UART_Transmit(puartHandle, (uint8_t*)uartTxBuffer, packetSize, 10);
+
+	return ret;
+}
+
+
+uint8_t rylr998_interrupt_flag;
+
+
+/**
+ * @brief  Sets IRQ flag whenever new data gets into gets recived in the Rx buffer
+ *
+ */
+void rylr998_SetInterruptFlag(void){
+	rylr998_interrupt_flag =1;
+}
+
+
+
+/**
+ * @brief  Returns the value of the flag
+ * @retval flag status
+ *
+ */
+uint8_t rylr998_GetInterruptFlag(void){
+	return rylr998_interrupt_flag;
+}
+
+
+/**
+ * @brief  Clear the IRQ flag
+ *
+ */
+void rylr998_ClearInterruptFlag(void){
+	rylr998_interrupt_flag =0;
+}
+
+
+
+
+
+
+
+
+/**
+ * @brief handles the response of the uart msg
+ * @params RxBuffer sorted
+ * @retval command selected
+ *
+ */
+RYLR_RX_command_t rylr998_ResponseFind(uint8_t *rxBuffer)
+{
+
+	RYLR_RX_command_t 	ret 					= RYLR_NOT_FOUND;
+	if(!memcmp(rxBuffer, "ADDRESS", 7))
+	{
+		return ret = RYLR_ADDRESS;
+	}
+	else if(!memcmp(rxBuffer, "+RCV", 4))
+	{
+		return ret = RYLR_RCV;
+	}
+	else if(!memcmp(rxBuffer, "+OK\r\n", 5))
+	{
+		return ret = RYLR_OK;
+	}
+	else if(!memcmp(rxBuffer, "+READY\r\n", 8))
+	{
+		return ret = RYLR_RDY;
+	}
+	else if(!memcmp(rxBuffer, "+ERR=", 5))
+	{
+		return ret = RYLR_ERR;
+	}
+	else if(!memcmp(rxBuffer, "+FACTORY\r\n", 10))
+	{
+		return ret = RYLR_FACTORY;
+	}
+	else if(!memcmp(rxBuffer, "+IPR=", 5))
+	{
+		return ret = RYLR_IPR;
+	}
+	return ret;
+}
+
+
+RYLR_RX_data_t rx_packet;
+
+void rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
+{
+
+	static uint8_t aux_buff[255];
+	static uint8_t start_indx=0;
+	static uint8_t i;
+	for (i = 0; i <RX_BUFFER_SIZE; i++){
+	    aux_buff[i] = pBuff[(start_indx + i) % RX_BUFFER_SIZE];
+	    if(aux_buff[i]=='\n'){
+	    	rylr998_ClearInterruptFlag();
+	    	break;
+	    }
+	    if(i==RX_BUFFER_SIZE && aux_buff[i]!='\n'){
+	    }
+
+	}
+	start_indx=(start_indx + i+1) % RX_BUFFER_SIZE;
+	i=0;
+
+
+
+            RYLR_RX_command_t cmd = rylr998_ResponseFind(aux_buff);
+
+            // Handle different cases
+            switch (cmd)
+            {
+                case RYLR_ADDRESS:
+                    // Handle ADDRESS response
+                    break;
+                case RYLR_RCV:
+                    // Handle RCV response
+                	/*Example: Module received the ID Address 50 send 5 bytes data,
+                	 * Content is HELLO string, RSSI is -99dBm, SNR is 40, It will show as below.
+                	 *  +RCV=50,5,HELLO,-99,40\r\n
+                	 */
+
+            	    char *token;
+
+
+            	    // Parse ID address
+            	    token = strtok(aux_buff, "=");  // Remove "+RCV="
+            	    token = strtok(NULL, ",");      // Get ID address
+            	    rx_packet.id = atoi(token);
+
+            	    // Parse byte count
+            	    token = strtok(NULL, ",");      // Get byte count
+            	    rx_packet.byte_count = atoi(token);
+
+            	    // Parse actual data
+            	    token = strtok(NULL, ",");
+            	    strncpy(rx_packet.data, token, rx_packet.byte_count);  // Copy up to byte_count
+            	    rx_packet.data[rx_packet.byte_count] = '\0';  // Ensure null termination
+
+            	    // Parse RSSI
+            	    token = strtok(NULL, ",");      // Get RSSI
+            	    rx_packet.rssi = atoi(token);
+
+            	    // Parse SNR
+            	    token = strtok(NULL, ",");      // Get SNR
+            	    rx_packet.snr = atoi(token);
+
+                    break;
+                case RYLR_OK:
+                    // Handle OK response
+                    break;
+                case RYLR_RDY:
+                    // Handle READY response
+                    break;
+                case RYLR_ERR:
+
+                	while(1){  //TODO  for now, if something went wrong, the code gets stuck here.
+                		Error_Handler();
+                	}
+                	break;
+                default:
+                    break;
+            }
+
+            rylr998_ClearInterruptFlag();
 }
 
