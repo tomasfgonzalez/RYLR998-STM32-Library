@@ -1,6 +1,5 @@
 ../Core/Src/main.c:64:6:LEDBlink	1
 ../Core/Src/main.c:78:6:HAL_UARTEx_RxEventCallback	3
-../Core/Src/main.c:96:6:LoRa_modeHighPower	28
-../Core/Src/main.c:213:5:main	1
-../Core/Src/main.c:342:6:SystemClock_Config	4
-../Core/Src/main.c:397:6:Error_Handler	1
+../Core/Src/main.c:98:5:main	1
+../Core/Src/main.c:186:6:SystemClock_Config	4
+../Core/Src/main.c:241:6:Error_Handler	1
