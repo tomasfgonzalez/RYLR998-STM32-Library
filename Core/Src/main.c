@@ -150,7 +150,7 @@ int main(void)
 	config_handler.CRFOP=22;
 
 	//Start the configuration
-	if (rylr998_config(&config_handler,rx_buff, RX_BUFFER_SIZE)==HAL_OK){
+	if (rylr998_config(&config_handler,&hlpuart1,rx_buff, RX_BUFFER_SIZE)==HAL_OK){
 		//CFG was successful
 	}else{
 		//any errors on RX will end up in a while internal loop

@@ -71,7 +71,7 @@ extern RYLR_RX_data_t rx_packet;
 
 
 
-HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,uint8_t *rx_buff,uint8_t RX_BUFFER_SIZE);
+HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,UART_HandleTypeDef *puartHandle,uint8_t *rx_buff,uint8_t RX_BUFFER_SIZE);
 
 //Tx
 HAL_StatusTypeDef rylr998_sendData(UART_HandleTypeDef *uartHandle,uint16_t address, uint8_t *data,uint8_t data_length);//uses MALLOC
@@ -87,6 +87,7 @@ HAL_StatusTypeDef rylr998_setCRFOP(UART_HandleTypeDef *puartHandle, uint8_t CRFO
 HAL_StatusTypeDef rylr998_FACTORY(UART_HandleTypeDef *puartHandle);
 //TODO AT+UID?
 //TODO AT+VER?
+//TODO Any ? command e.g AT+ADDRESS?, using rylr998_FACTORY implementation should be straightforward
 
 
 //Rx

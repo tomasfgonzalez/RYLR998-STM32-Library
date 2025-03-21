@@ -13,20 +13,9 @@
 
 
 
-HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,uint8_t *rx_buff,uint8_t RX_BUFFER_SIZE){
-// Only if you need to reset to factory
-	/*if(rylr998_FACTORY(&hlpuart1)==HAL_OK){
-	while(1){
-			if(rylr998_GetInterruptFlag()){
-					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_FACTORY){
-						LEDBlink(GPIOB, GPIO_PIN_3, 1000);
-						break;
-					}
-				}
-			}
-		}
-*/
-	if(rylr998_FACTORY(&hlpuart1)==HAL_OK){
+HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,UART_HandleTypeDef *puartHandle,uint8_t *rx_buff,uint8_t RX_BUFFER_SIZE){
+
+	if(rylr998_FACTORY(puartHandle)==HAL_OK){
 		while(1){
 				if(rylr998_GetInterruptFlag()){
 						if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_FACTORY){
@@ -36,7 +25,7 @@ HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,uint8_t *rx_buff,
 				}
 			}
 		//NETWORKID
-		if(rylr998_networkId(&hlpuart1,config_handler->networkId)==HAL_OK){
+		if(rylr998_networkId(puartHandle,config_handler->networkId)==HAL_OK){
 			while(1){
 				if(rylr998_GetInterruptFlag()){
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
@@ -46,7 +35,7 @@ HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,uint8_t *rx_buff,
 			}
 		}
 		//ADDRESS
-		if(rylr998_setAddress(&hlpuart1,config_handler->address)==HAL_OK){  //ADDRESS of the device =1
+		if(rylr998_setAddress(puartHandle,config_handler->address)==HAL_OK){  //ADDRESS of the device =1
 		while(1){
 				if(rylr998_GetInterruptFlag()){
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
@@ -56,7 +45,7 @@ HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,uint8_t *rx_buff,
 			}
 		}
 		//PARAMETERS
-		if(rylr998_setParameter(&hlpuart1,config_handler->SF,config_handler->BW,config_handler->CR,config_handler->ProgramedPreamble)==HAL_OK){ //SF = 9, BW= 125kHz, CR=1,Programed Preamble = 12 (MAX RANGE CONFIG, also the default factory settings)
+		if(rylr998_setParameter(puartHandle,config_handler->SF,config_handler->BW,config_handler->CR,config_handler->ProgramedPreamble)==HAL_OK){ //SF = 9, BW= 125kHz, CR=1,Programed Preamble = 12 (MAX RANGE CONFIG, also the default factory settings)
 		while(1){
 				if(rylr998_GetInterruptFlag()){
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
@@ -66,7 +55,7 @@ HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,uint8_t *rx_buff,
 			}
 		}
 		//MODE
-		if(rylr998_mode(&hlpuart1,config_handler->mode,config_handler->rxTime,config_handler->LowSpeedTime)==HAL_OK){  //MODE 1, normal
+		if(rylr998_mode(puartHandle,config_handler->mode,config_handler->rxTime,config_handler->LowSpeedTime)==HAL_OK){  //MODE 1, normal
 		while(1){
 				if(rylr998_GetInterruptFlag()){
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
@@ -76,7 +65,7 @@ HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,uint8_t *rx_buff,
 			}
 		}
 		//BAUD RATE
-		if(rylr998_setBaudRate(&hlpuart1,config_handler->baudRate)==HAL_OK){
+		if(rylr998_setBaudRate(puartHandle,config_handler->baudRate)==HAL_OK){
 		while(1){
 			if(rylr998_GetInterruptFlag()){
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_IPR){
@@ -86,7 +75,7 @@ HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,uint8_t *rx_buff,
 			}
 		}
 		//FREQ Band on FLASH
-		if(rylr998_setBand(&hlpuart1,config_handler->frequency,config_handler->memory)==HAL_OK){ //Saves it on flash
+		if(rylr998_setBand(puartHandle,config_handler->frequency,config_handler->memory)==HAL_OK){ //Saves it on flash
 		while(1){
 			if(rylr998_GetInterruptFlag()){
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
@@ -97,7 +86,7 @@ HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,uint8_t *rx_buff,
 		}
 		//PASSWORD
 
-		if(rylr998_setCPIN(&hlpuart1,config_handler->password)==HAL_OK){
+		if(rylr998_setCPIN(puartHandle,config_handler->password)==HAL_OK){
 		while(1){
 			if(rylr998_GetInterruptFlag()){
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
@@ -107,7 +96,7 @@ HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,uint8_t *rx_buff,
 			}
 		}
 		//RF Output Power must be set to less than AT+CRFOP=14 to comply CE certification.
-		if(rylr998_setCRFOP(&hlpuart1,config_handler->CRFOP)==HAL_OK){
+		if(rylr998_setCRFOP(puartHandle,config_handler->CRFOP)==HAL_OK){
 		while(1){
 			if(rylr998_GetInterruptFlag()){
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){

@@ -27,25 +27,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000028  00000000  00000000  00008068  2**0
                   CONTENTS, READONLY
- 12 .debug_info   0000b3f2  00000000  00000000  00008090  2**0
+ 12 .debug_info   0000b3f5  00000000  00000000  00008090  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 00002205  00000000  00000000  00013482  2**0
+ 13 .debug_abbrev 00002205  00000000  00000000  00013485  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 00000918  00000000  00000000  00015688  2**3
+ 14 .debug_aranges 00000918  00000000  00000000  00015690  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_rnglists 000006e1  00000000  00000000  00015fa0  2**0
+ 15 .debug_rnglists 000006e1  00000000  00000000  00015fa8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  000127b9  00000000  00000000  00016681  2**0
+ 16 .debug_macro  000127b9  00000000  00000000  00016689  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0000d598  00000000  00000000  00028e3a  2**0
+ 17 .debug_line   0000d597  00000000  00000000  00028e42  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000689db  00000000  00000000  000363d2  2**0
+ 18 .debug_str    000689db  00000000  00000000  000363d9  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  0009edad  2**0
+ 19 .comment      00000043  00000000  00000000  0009edb4  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00002ab8  00000000  00000000  0009edf0  2**2
+ 20 .debug_frame  00002ab8  00000000  00000000  0009edf8  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000066  00000000  00000000  000a18a8  2**0
+ 21 .debug_line_str 00000066  00000000  00000000  000a18b0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1134,11 +1134,11 @@ int main(void)
  800085e:	5499      	strb	r1, [r3, r2]
 
 	//Start the configuration
-	if (rylr998_config(&config_handler,rx_buff, RX_BUFFER_SIZE)==HAL_OK){
- 8000860:	4903      	ldr	r1, [pc, #12]	@ (8000870 <main+0xa0>)
- 8000862:	003b      	movs	r3, r7
- 8000864:	22ff      	movs	r2, #255	@ 0xff
- 8000866:	0018      	movs	r0, r3
+	if (rylr998_config(&config_handler,&hlpuart1,rx_buff, RX_BUFFER_SIZE)==HAL_OK){
+ 8000860:	4a03      	ldr	r2, [pc, #12]	@ (8000870 <main+0xa0>)
+ 8000862:	4904      	ldr	r1, [pc, #16]	@ (8000874 <main+0xa4>)
+ 8000864:	0038      	movs	r0, r7
+ 8000866:	23ff      	movs	r3, #255	@ 0xff
  8000868:	f000 f886 	bl	8000978 <rylr998_config>
 		//any errors on RX will end up in a while internal loop
 	}
@@ -1343,324 +1343,321 @@ __STATIC_FORCEINLINE void __disable_irq(void)
 
 
 
-HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,uint8_t *rx_buff,uint8_t RX_BUFFER_SIZE){
+HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,UART_HandleTypeDef *puartHandle,uint8_t *rx_buff,uint8_t RX_BUFFER_SIZE){
  8000978:	b590      	push	{r4, r7, lr}
  800097a:	b087      	sub	sp, #28
  800097c:	af02      	add	r7, sp, #8
  800097e:	60f8      	str	r0, [r7, #12]
  8000980:	60b9      	str	r1, [r7, #8]
- 8000982:	1dfb      	adds	r3, r7, #7
- 8000984:	701a      	strb	r2, [r3, #0]
-					}
-				}
-			}
-		}
-*/
-	if(rylr998_FACTORY(&hlpuart1)==HAL_OK){
- 8000986:	4b73      	ldr	r3, [pc, #460]	@ (8000b54 <rylr998_config+0x1dc>)
- 8000988:	0018      	movs	r0, r3
- 800098a:	f000 fb83 	bl	8001094 <rylr998_FACTORY>
- 800098e:	1e03      	subs	r3, r0, #0
- 8000990:	d10f      	bne.n	80009b2 <rylr998_config+0x3a>
+ 8000982:	607a      	str	r2, [r7, #4]
+ 8000984:	001a      	movs	r2, r3
+ 8000986:	1cfb      	adds	r3, r7, #3
+ 8000988:	701a      	strb	r2, [r3, #0]
+
+	if(rylr998_FACTORY(puartHandle)==HAL_OK){
+ 800098a:	68bb      	ldr	r3, [r7, #8]
+ 800098c:	0018      	movs	r0, r3
+ 800098e:	f000 fb81 	bl	8001094 <rylr998_FACTORY>
+ 8000992:	1e03      	subs	r3, r0, #0
+ 8000994:	d10f      	bne.n	80009b6 <rylr998_config+0x3e>
 		while(1){
 				if(rylr998_GetInterruptFlag()){
- 8000992:	f000 fbbf 	bl	8001114 <rylr998_GetInterruptFlag>
- 8000996:	1e03      	subs	r3, r0, #0
- 8000998:	d0fb      	beq.n	8000992 <rylr998_config+0x1a>
+ 8000996:	f000 fbbd 	bl	8001114 <rylr998_GetInterruptFlag>
+ 800099a:	1e03      	subs	r3, r0, #0
+ 800099c:	d0fb      	beq.n	8000996 <rylr998_config+0x1e>
 						if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_FACTORY){
- 800099a:	1dfb      	adds	r3, r7, #7
- 800099c:	781a      	ldrb	r2, [r3, #0]
- 800099e:	68bb      	ldr	r3, [r7, #8]
- 80009a0:	0011      	movs	r1, r2
- 80009a2:	0018      	movs	r0, r3
- 80009a4:	f000 fc50 	bl	8001248 <rylr998_prase_reciver>
- 80009a8:	0003      	movs	r3, r0
- 80009aa:	2b07      	cmp	r3, #7
- 80009ac:	d000      	beq.n	80009b0 <rylr998_config+0x38>
+ 800099e:	1cfb      	adds	r3, r7, #3
+ 80009a0:	781a      	ldrb	r2, [r3, #0]
+ 80009a2:	687b      	ldr	r3, [r7, #4]
+ 80009a4:	0011      	movs	r1, r2
+ 80009a6:	0018      	movs	r0, r3
+ 80009a8:	f000 fc4e 	bl	8001248 <rylr998_prase_reciver>
+ 80009ac:	0003      	movs	r3, r0
+ 80009ae:	2b07      	cmp	r3, #7
+ 80009b0:	d000      	beq.n	80009b4 <rylr998_config+0x3c>
 				if(rylr998_GetInterruptFlag()){
- 80009ae:	e7f0      	b.n	8000992 <rylr998_config+0x1a>
+ 80009b2:	e7f0      	b.n	8000996 <rylr998_config+0x1e>
 							break;
- 80009b0:	46c0      	nop			@ (mov r8, r8)
+ 80009b4:	46c0      	nop			@ (mov r8, r8)
 						}
 					}
 				}
 			}
 		//NETWORKID
-		if(rylr998_networkId(&hlpuart1,config_handler->networkId)==HAL_OK){
- 80009b2:	68fb      	ldr	r3, [r7, #12]
- 80009b4:	781a      	ldrb	r2, [r3, #0]
- 80009b6:	4b67      	ldr	r3, [pc, #412]	@ (8000b54 <rylr998_config+0x1dc>)
- 80009b8:	0011      	movs	r1, r2
- 80009ba:	0018      	movs	r0, r3
- 80009bc:	f000 f8cc 	bl	8000b58 <rylr998_networkId>
- 80009c0:	1e03      	subs	r3, r0, #0
- 80009c2:	d10e      	bne.n	80009e2 <rylr998_config+0x6a>
+		if(rylr998_networkId(puartHandle,config_handler->networkId)==HAL_OK){
+ 80009b6:	68fb      	ldr	r3, [r7, #12]
+ 80009b8:	781a      	ldrb	r2, [r3, #0]
+ 80009ba:	68bb      	ldr	r3, [r7, #8]
+ 80009bc:	0011      	movs	r1, r2
+ 80009be:	0018      	movs	r0, r3
+ 80009c0:	f000 f8ca 	bl	8000b58 <rylr998_networkId>
+ 80009c4:	1e03      	subs	r3, r0, #0
+ 80009c6:	d10e      	bne.n	80009e6 <rylr998_config+0x6e>
 			while(1){
 				if(rylr998_GetInterruptFlag()){
- 80009c4:	f000 fba6 	bl	8001114 <rylr998_GetInterruptFlag>
- 80009c8:	1e03      	subs	r3, r0, #0
- 80009ca:	d0fb      	beq.n	80009c4 <rylr998_config+0x4c>
+ 80009c8:	f000 fba4 	bl	8001114 <rylr998_GetInterruptFlag>
+ 80009cc:	1e03      	subs	r3, r0, #0
+ 80009ce:	d0fb      	beq.n	80009c8 <rylr998_config+0x50>
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
- 80009cc:	1dfb      	adds	r3, r7, #7
- 80009ce:	781a      	ldrb	r2, [r3, #0]
- 80009d0:	68bb      	ldr	r3, [r7, #8]
- 80009d2:	0011      	movs	r1, r2
- 80009d4:	0018      	movs	r0, r3
- 80009d6:	f000 fc37 	bl	8001248 <rylr998_prase_reciver>
- 80009da:	1e03      	subs	r3, r0, #0
- 80009dc:	d000      	beq.n	80009e0 <rylr998_config+0x68>
+ 80009d0:	1cfb      	adds	r3, r7, #3
+ 80009d2:	781a      	ldrb	r2, [r3, #0]
+ 80009d4:	687b      	ldr	r3, [r7, #4]
+ 80009d6:	0011      	movs	r1, r2
+ 80009d8:	0018      	movs	r0, r3
+ 80009da:	f000 fc35 	bl	8001248 <rylr998_prase_reciver>
+ 80009de:	1e03      	subs	r3, r0, #0
+ 80009e0:	d000      	beq.n	80009e4 <rylr998_config+0x6c>
 				if(rylr998_GetInterruptFlag()){
- 80009de:	e7f1      	b.n	80009c4 <rylr998_config+0x4c>
+ 80009e2:	e7f1      	b.n	80009c8 <rylr998_config+0x50>
 						break;
- 80009e0:	46c0      	nop			@ (mov r8, r8)
+ 80009e4:	46c0      	nop			@ (mov r8, r8)
 					}
 				}
 			}
 		}
 		//ADDRESS
-		if(rylr998_setAddress(&hlpuart1,config_handler->address)==HAL_OK){  //ADDRESS of the device =1
- 80009e2:	68fb      	ldr	r3, [r7, #12]
- 80009e4:	885a      	ldrh	r2, [r3, #2]
- 80009e6:	4b5b      	ldr	r3, [pc, #364]	@ (8000b54 <rylr998_config+0x1dc>)
- 80009e8:	0011      	movs	r1, r2
- 80009ea:	0018      	movs	r0, r3
- 80009ec:	f000 f8fc 	bl	8000be8 <rylr998_setAddress>
- 80009f0:	1e03      	subs	r3, r0, #0
- 80009f2:	d10e      	bne.n	8000a12 <rylr998_config+0x9a>
+		if(rylr998_setAddress(puartHandle,config_handler->address)==HAL_OK){  //ADDRESS of the device =1
+ 80009e6:	68fb      	ldr	r3, [r7, #12]
+ 80009e8:	885a      	ldrh	r2, [r3, #2]
+ 80009ea:	68bb      	ldr	r3, [r7, #8]
+ 80009ec:	0011      	movs	r1, r2
+ 80009ee:	0018      	movs	r0, r3
+ 80009f0:	f000 f8fa 	bl	8000be8 <rylr998_setAddress>
+ 80009f4:	1e03      	subs	r3, r0, #0
+ 80009f6:	d10e      	bne.n	8000a16 <rylr998_config+0x9e>
 		while(1){
 				if(rylr998_GetInterruptFlag()){
- 80009f4:	f000 fb8e 	bl	8001114 <rylr998_GetInterruptFlag>
- 80009f8:	1e03      	subs	r3, r0, #0
- 80009fa:	d0fb      	beq.n	80009f4 <rylr998_config+0x7c>
+ 80009f8:	f000 fb8c 	bl	8001114 <rylr998_GetInterruptFlag>
+ 80009fc:	1e03      	subs	r3, r0, #0
+ 80009fe:	d0fb      	beq.n	80009f8 <rylr998_config+0x80>
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
- 80009fc:	1dfb      	adds	r3, r7, #7
- 80009fe:	781a      	ldrb	r2, [r3, #0]
- 8000a00:	68bb      	ldr	r3, [r7, #8]
- 8000a02:	0011      	movs	r1, r2
- 8000a04:	0018      	movs	r0, r3
- 8000a06:	f000 fc1f 	bl	8001248 <rylr998_prase_reciver>
- 8000a0a:	1e03      	subs	r3, r0, #0
- 8000a0c:	d000      	beq.n	8000a10 <rylr998_config+0x98>
+ 8000a00:	1cfb      	adds	r3, r7, #3
+ 8000a02:	781a      	ldrb	r2, [r3, #0]
+ 8000a04:	687b      	ldr	r3, [r7, #4]
+ 8000a06:	0011      	movs	r1, r2
+ 8000a08:	0018      	movs	r0, r3
+ 8000a0a:	f000 fc1d 	bl	8001248 <rylr998_prase_reciver>
+ 8000a0e:	1e03      	subs	r3, r0, #0
+ 8000a10:	d000      	beq.n	8000a14 <rylr998_config+0x9c>
 				if(rylr998_GetInterruptFlag()){
- 8000a0e:	e7f1      	b.n	80009f4 <rylr998_config+0x7c>
+ 8000a12:	e7f1      	b.n	80009f8 <rylr998_config+0x80>
 						break;
- 8000a10:	46c0      	nop			@ (mov r8, r8)
+ 8000a14:	46c0      	nop			@ (mov r8, r8)
 					}
 				}
 			}
 		}
 		//PARAMETERS
-		if(rylr998_setParameter(&hlpuart1,config_handler->SF,config_handler->BW,config_handler->CR,config_handler->ProgramedPreamble)==HAL_OK){ //SF = 9, BW= 125kHz, CR=1,Programed Preamble = 12 (MAX RANGE CONFIG, also the default factory settings)
- 8000a12:	68fb      	ldr	r3, [r7, #12]
- 8000a14:	7919      	ldrb	r1, [r3, #4]
+		if(rylr998_setParameter(puartHandle,config_handler->SF,config_handler->BW,config_handler->CR,config_handler->ProgramedPreamble)==HAL_OK){ //SF = 9, BW= 125kHz, CR=1,Programed Preamble = 12 (MAX RANGE CONFIG, also the default factory settings)
  8000a16:	68fb      	ldr	r3, [r7, #12]
- 8000a18:	795a      	ldrb	r2, [r3, #5]
+ 8000a18:	7919      	ldrb	r1, [r3, #4]
  8000a1a:	68fb      	ldr	r3, [r7, #12]
- 8000a1c:	799c      	ldrb	r4, [r3, #6]
+ 8000a1c:	795a      	ldrb	r2, [r3, #5]
  8000a1e:	68fb      	ldr	r3, [r7, #12]
- 8000a20:	79db      	ldrb	r3, [r3, #7]
- 8000a22:	484c      	ldr	r0, [pc, #304]	@ (8000b54 <rylr998_config+0x1dc>)
- 8000a24:	9300      	str	r3, [sp, #0]
- 8000a26:	0023      	movs	r3, r4
- 8000a28:	f000 f918 	bl	8000c5c <rylr998_setParameter>
- 8000a2c:	1e03      	subs	r3, r0, #0
- 8000a2e:	d10e      	bne.n	8000a4e <rylr998_config+0xd6>
+ 8000a20:	799c      	ldrb	r4, [r3, #6]
+ 8000a22:	68fb      	ldr	r3, [r7, #12]
+ 8000a24:	79db      	ldrb	r3, [r3, #7]
+ 8000a26:	68b8      	ldr	r0, [r7, #8]
+ 8000a28:	9300      	str	r3, [sp, #0]
+ 8000a2a:	0023      	movs	r3, r4
+ 8000a2c:	f000 f916 	bl	8000c5c <rylr998_setParameter>
+ 8000a30:	1e03      	subs	r3, r0, #0
+ 8000a32:	d10e      	bne.n	8000a52 <rylr998_config+0xda>
 		while(1){
 				if(rylr998_GetInterruptFlag()){
- 8000a30:	f000 fb70 	bl	8001114 <rylr998_GetInterruptFlag>
- 8000a34:	1e03      	subs	r3, r0, #0
- 8000a36:	d0fb      	beq.n	8000a30 <rylr998_config+0xb8>
+ 8000a34:	f000 fb6e 	bl	8001114 <rylr998_GetInterruptFlag>
+ 8000a38:	1e03      	subs	r3, r0, #0
+ 8000a3a:	d0fb      	beq.n	8000a34 <rylr998_config+0xbc>
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
- 8000a38:	1dfb      	adds	r3, r7, #7
- 8000a3a:	781a      	ldrb	r2, [r3, #0]
- 8000a3c:	68bb      	ldr	r3, [r7, #8]
- 8000a3e:	0011      	movs	r1, r2
- 8000a40:	0018      	movs	r0, r3
- 8000a42:	f000 fc01 	bl	8001248 <rylr998_prase_reciver>
- 8000a46:	1e03      	subs	r3, r0, #0
- 8000a48:	d000      	beq.n	8000a4c <rylr998_config+0xd4>
+ 8000a3c:	1cfb      	adds	r3, r7, #3
+ 8000a3e:	781a      	ldrb	r2, [r3, #0]
+ 8000a40:	687b      	ldr	r3, [r7, #4]
+ 8000a42:	0011      	movs	r1, r2
+ 8000a44:	0018      	movs	r0, r3
+ 8000a46:	f000 fbff 	bl	8001248 <rylr998_prase_reciver>
+ 8000a4a:	1e03      	subs	r3, r0, #0
+ 8000a4c:	d000      	beq.n	8000a50 <rylr998_config+0xd8>
 				if(rylr998_GetInterruptFlag()){
- 8000a4a:	e7f1      	b.n	8000a30 <rylr998_config+0xb8>
+ 8000a4e:	e7f1      	b.n	8000a34 <rylr998_config+0xbc>
 						break;
- 8000a4c:	46c0      	nop			@ (mov r8, r8)
+ 8000a50:	46c0      	nop			@ (mov r8, r8)
 					}
 				}
 			}
 		}
 		//MODE
-		if(rylr998_mode(&hlpuart1,config_handler->mode,config_handler->rxTime,config_handler->LowSpeedTime)==HAL_OK){  //MODE 1, normal
- 8000a4e:	68fb      	ldr	r3, [r7, #12]
- 8000a50:	7a19      	ldrb	r1, [r3, #8]
+		if(rylr998_mode(puartHandle,config_handler->mode,config_handler->rxTime,config_handler->LowSpeedTime)==HAL_OK){  //MODE 1, normal
  8000a52:	68fb      	ldr	r3, [r7, #12]
- 8000a54:	68da      	ldr	r2, [r3, #12]
+ 8000a54:	7a19      	ldrb	r1, [r3, #8]
  8000a56:	68fb      	ldr	r3, [r7, #12]
- 8000a58:	691b      	ldr	r3, [r3, #16]
- 8000a5a:	483e      	ldr	r0, [pc, #248]	@ (8000b54 <rylr998_config+0x1dc>)
- 8000a5c:	f000 f974 	bl	8000d48 <rylr998_mode>
- 8000a60:	1e03      	subs	r3, r0, #0
- 8000a62:	d10e      	bne.n	8000a82 <rylr998_config+0x10a>
+ 8000a58:	68da      	ldr	r2, [r3, #12]
+ 8000a5a:	68fb      	ldr	r3, [r7, #12]
+ 8000a5c:	691b      	ldr	r3, [r3, #16]
+ 8000a5e:	68b8      	ldr	r0, [r7, #8]
+ 8000a60:	f000 f972 	bl	8000d48 <rylr998_mode>
+ 8000a64:	1e03      	subs	r3, r0, #0
+ 8000a66:	d10e      	bne.n	8000a86 <rylr998_config+0x10e>
 		while(1){
 				if(rylr998_GetInterruptFlag()){
- 8000a64:	f000 fb56 	bl	8001114 <rylr998_GetInterruptFlag>
- 8000a68:	1e03      	subs	r3, r0, #0
- 8000a6a:	d0fb      	beq.n	8000a64 <rylr998_config+0xec>
+ 8000a68:	f000 fb54 	bl	8001114 <rylr998_GetInterruptFlag>
+ 8000a6c:	1e03      	subs	r3, r0, #0
+ 8000a6e:	d0fb      	beq.n	8000a68 <rylr998_config+0xf0>
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
- 8000a6c:	1dfb      	adds	r3, r7, #7
- 8000a6e:	781a      	ldrb	r2, [r3, #0]
- 8000a70:	68bb      	ldr	r3, [r7, #8]
- 8000a72:	0011      	movs	r1, r2
- 8000a74:	0018      	movs	r0, r3
- 8000a76:	f000 fbe7 	bl	8001248 <rylr998_prase_reciver>
- 8000a7a:	1e03      	subs	r3, r0, #0
- 8000a7c:	d000      	beq.n	8000a80 <rylr998_config+0x108>
+ 8000a70:	1cfb      	adds	r3, r7, #3
+ 8000a72:	781a      	ldrb	r2, [r3, #0]
+ 8000a74:	687b      	ldr	r3, [r7, #4]
+ 8000a76:	0011      	movs	r1, r2
+ 8000a78:	0018      	movs	r0, r3
+ 8000a7a:	f000 fbe5 	bl	8001248 <rylr998_prase_reciver>
+ 8000a7e:	1e03      	subs	r3, r0, #0
+ 8000a80:	d000      	beq.n	8000a84 <rylr998_config+0x10c>
 				if(rylr998_GetInterruptFlag()){
- 8000a7e:	e7f1      	b.n	8000a64 <rylr998_config+0xec>
+ 8000a82:	e7f1      	b.n	8000a68 <rylr998_config+0xf0>
 						break;
- 8000a80:	46c0      	nop			@ (mov r8, r8)
+ 8000a84:	46c0      	nop			@ (mov r8, r8)
 					}
 				}
 			}
 		}
 		//BAUD RATE
-		if(rylr998_setBaudRate(&hlpuart1,config_handler->baudRate)==HAL_OK){
- 8000a82:	68fb      	ldr	r3, [r7, #12]
- 8000a84:	695a      	ldr	r2, [r3, #20]
- 8000a86:	4b33      	ldr	r3, [pc, #204]	@ (8000b54 <rylr998_config+0x1dc>)
- 8000a88:	0011      	movs	r1, r2
- 8000a8a:	0018      	movs	r0, r3
- 8000a8c:	f000 f9dc 	bl	8000e48 <rylr998_setBaudRate>
- 8000a90:	1e03      	subs	r3, r0, #0
- 8000a92:	d10f      	bne.n	8000ab4 <rylr998_config+0x13c>
+		if(rylr998_setBaudRate(puartHandle,config_handler->baudRate)==HAL_OK){
+ 8000a86:	68fb      	ldr	r3, [r7, #12]
+ 8000a88:	695a      	ldr	r2, [r3, #20]
+ 8000a8a:	68bb      	ldr	r3, [r7, #8]
+ 8000a8c:	0011      	movs	r1, r2
+ 8000a8e:	0018      	movs	r0, r3
+ 8000a90:	f000 f9da 	bl	8000e48 <rylr998_setBaudRate>
+ 8000a94:	1e03      	subs	r3, r0, #0
+ 8000a96:	d10f      	bne.n	8000ab8 <rylr998_config+0x140>
 		while(1){
 			if(rylr998_GetInterruptFlag()){
- 8000a94:	f000 fb3e 	bl	8001114 <rylr998_GetInterruptFlag>
- 8000a98:	1e03      	subs	r3, r0, #0
- 8000a9a:	d0fb      	beq.n	8000a94 <rylr998_config+0x11c>
+ 8000a98:	f000 fb3c 	bl	8001114 <rylr998_GetInterruptFlag>
+ 8000a9c:	1e03      	subs	r3, r0, #0
+ 8000a9e:	d0fb      	beq.n	8000a98 <rylr998_config+0x120>
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_IPR){
- 8000a9c:	1dfb      	adds	r3, r7, #7
- 8000a9e:	781a      	ldrb	r2, [r3, #0]
- 8000aa0:	68bb      	ldr	r3, [r7, #8]
- 8000aa2:	0011      	movs	r1, r2
- 8000aa4:	0018      	movs	r0, r3
- 8000aa6:	f000 fbcf 	bl	8001248 <rylr998_prase_reciver>
- 8000aaa:	0003      	movs	r3, r0
- 8000aac:	2b04      	cmp	r3, #4
- 8000aae:	d000      	beq.n	8000ab2 <rylr998_config+0x13a>
+ 8000aa0:	1cfb      	adds	r3, r7, #3
+ 8000aa2:	781a      	ldrb	r2, [r3, #0]
+ 8000aa4:	687b      	ldr	r3, [r7, #4]
+ 8000aa6:	0011      	movs	r1, r2
+ 8000aa8:	0018      	movs	r0, r3
+ 8000aaa:	f000 fbcd 	bl	8001248 <rylr998_prase_reciver>
+ 8000aae:	0003      	movs	r3, r0
+ 8000ab0:	2b04      	cmp	r3, #4
+ 8000ab2:	d000      	beq.n	8000ab6 <rylr998_config+0x13e>
 			if(rylr998_GetInterruptFlag()){
- 8000ab0:	e7f0      	b.n	8000a94 <rylr998_config+0x11c>
+ 8000ab4:	e7f0      	b.n	8000a98 <rylr998_config+0x120>
 						break;
- 8000ab2:	46c0      	nop			@ (mov r8, r8)
+ 8000ab6:	46c0      	nop			@ (mov r8, r8)
 					}
 				}
 			}
 		}
 		//FREQ Band on FLASH
-		if(rylr998_setBand(&hlpuart1,config_handler->frequency,config_handler->memory)==HAL_OK){ //Saves it on flash
- 8000ab4:	68fb      	ldr	r3, [r7, #12]
- 8000ab6:	6999      	ldr	r1, [r3, #24]
+		if(rylr998_setBand(puartHandle,config_handler->frequency,config_handler->memory)==HAL_OK){ //Saves it on flash
  8000ab8:	68fb      	ldr	r3, [r7, #12]
- 8000aba:	7f1a      	ldrb	r2, [r3, #28]
- 8000abc:	4b25      	ldr	r3, [pc, #148]	@ (8000b54 <rylr998_config+0x1dc>)
- 8000abe:	0018      	movs	r0, r3
- 8000ac0:	f000 fa06 	bl	8000ed0 <rylr998_setBand>
- 8000ac4:	1e03      	subs	r3, r0, #0
- 8000ac6:	d10e      	bne.n	8000ae6 <rylr998_config+0x16e>
+ 8000aba:	6999      	ldr	r1, [r3, #24]
+ 8000abc:	68fb      	ldr	r3, [r7, #12]
+ 8000abe:	7f1a      	ldrb	r2, [r3, #28]
+ 8000ac0:	68bb      	ldr	r3, [r7, #8]
+ 8000ac2:	0018      	movs	r0, r3
+ 8000ac4:	f000 fa04 	bl	8000ed0 <rylr998_setBand>
+ 8000ac8:	1e03      	subs	r3, r0, #0
+ 8000aca:	d10e      	bne.n	8000aea <rylr998_config+0x172>
 		while(1){
 			if(rylr998_GetInterruptFlag()){
- 8000ac8:	f000 fb24 	bl	8001114 <rylr998_GetInterruptFlag>
- 8000acc:	1e03      	subs	r3, r0, #0
- 8000ace:	d0fb      	beq.n	8000ac8 <rylr998_config+0x150>
+ 8000acc:	f000 fb22 	bl	8001114 <rylr998_GetInterruptFlag>
+ 8000ad0:	1e03      	subs	r3, r0, #0
+ 8000ad2:	d0fb      	beq.n	8000acc <rylr998_config+0x154>
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
- 8000ad0:	1dfb      	adds	r3, r7, #7
- 8000ad2:	781a      	ldrb	r2, [r3, #0]
- 8000ad4:	68bb      	ldr	r3, [r7, #8]
- 8000ad6:	0011      	movs	r1, r2
- 8000ad8:	0018      	movs	r0, r3
- 8000ada:	f000 fbb5 	bl	8001248 <rylr998_prase_reciver>
- 8000ade:	1e03      	subs	r3, r0, #0
- 8000ae0:	d000      	beq.n	8000ae4 <rylr998_config+0x16c>
+ 8000ad4:	1cfb      	adds	r3, r7, #3
+ 8000ad6:	781a      	ldrb	r2, [r3, #0]
+ 8000ad8:	687b      	ldr	r3, [r7, #4]
+ 8000ada:	0011      	movs	r1, r2
+ 8000adc:	0018      	movs	r0, r3
+ 8000ade:	f000 fbb3 	bl	8001248 <rylr998_prase_reciver>
+ 8000ae2:	1e03      	subs	r3, r0, #0
+ 8000ae4:	d000      	beq.n	8000ae8 <rylr998_config+0x170>
 			if(rylr998_GetInterruptFlag()){
- 8000ae2:	e7f1      	b.n	8000ac8 <rylr998_config+0x150>
+ 8000ae6:	e7f1      	b.n	8000acc <rylr998_config+0x154>
 						break;
- 8000ae4:	46c0      	nop			@ (mov r8, r8)
+ 8000ae8:	46c0      	nop			@ (mov r8, r8)
 				}
 			}
 		}
 		//PASSWORD
 
-		if(rylr998_setCPIN(&hlpuart1,config_handler->password)==HAL_OK){
- 8000ae6:	68fb      	ldr	r3, [r7, #12]
- 8000ae8:	331d      	adds	r3, #29
- 8000aea:	001a      	movs	r2, r3
- 8000aec:	4b19      	ldr	r3, [pc, #100]	@ (8000b54 <rylr998_config+0x1dc>)
- 8000aee:	0011      	movs	r1, r2
- 8000af0:	0018      	movs	r0, r3
- 8000af2:	f000 fa47 	bl	8000f84 <rylr998_setCPIN>
- 8000af6:	1e03      	subs	r3, r0, #0
- 8000af8:	d10e      	bne.n	8000b18 <rylr998_config+0x1a0>
+		if(rylr998_setCPIN(puartHandle,config_handler->password)==HAL_OK){
+ 8000aea:	68fb      	ldr	r3, [r7, #12]
+ 8000aec:	331d      	adds	r3, #29
+ 8000aee:	001a      	movs	r2, r3
+ 8000af0:	68bb      	ldr	r3, [r7, #8]
+ 8000af2:	0011      	movs	r1, r2
+ 8000af4:	0018      	movs	r0, r3
+ 8000af6:	f000 fa45 	bl	8000f84 <rylr998_setCPIN>
+ 8000afa:	1e03      	subs	r3, r0, #0
+ 8000afc:	d10e      	bne.n	8000b1c <rylr998_config+0x1a4>
 		while(1){
 			if(rylr998_GetInterruptFlag()){
- 8000afa:	f000 fb0b 	bl	8001114 <rylr998_GetInterruptFlag>
- 8000afe:	1e03      	subs	r3, r0, #0
- 8000b00:	d0fb      	beq.n	8000afa <rylr998_config+0x182>
+ 8000afe:	f000 fb09 	bl	8001114 <rylr998_GetInterruptFlag>
+ 8000b02:	1e03      	subs	r3, r0, #0
+ 8000b04:	d0fb      	beq.n	8000afe <rylr998_config+0x186>
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
- 8000b02:	1dfb      	adds	r3, r7, #7
- 8000b04:	781a      	ldrb	r2, [r3, #0]
- 8000b06:	68bb      	ldr	r3, [r7, #8]
- 8000b08:	0011      	movs	r1, r2
- 8000b0a:	0018      	movs	r0, r3
- 8000b0c:	f000 fb9c 	bl	8001248 <rylr998_prase_reciver>
- 8000b10:	1e03      	subs	r3, r0, #0
- 8000b12:	d000      	beq.n	8000b16 <rylr998_config+0x19e>
+ 8000b06:	1cfb      	adds	r3, r7, #3
+ 8000b08:	781a      	ldrb	r2, [r3, #0]
+ 8000b0a:	687b      	ldr	r3, [r7, #4]
+ 8000b0c:	0011      	movs	r1, r2
+ 8000b0e:	0018      	movs	r0, r3
+ 8000b10:	f000 fb9a 	bl	8001248 <rylr998_prase_reciver>
+ 8000b14:	1e03      	subs	r3, r0, #0
+ 8000b16:	d000      	beq.n	8000b1a <rylr998_config+0x1a2>
 			if(rylr998_GetInterruptFlag()){
- 8000b14:	e7f1      	b.n	8000afa <rylr998_config+0x182>
+ 8000b18:	e7f1      	b.n	8000afe <rylr998_config+0x186>
 						break;
- 8000b16:	46c0      	nop			@ (mov r8, r8)
+ 8000b1a:	46c0      	nop			@ (mov r8, r8)
 					}
 				}
 			}
 		}
 		//RF Output Power must be set to less than AT+CRFOP=14 to comply CE certification.
-		if(rylr998_setCRFOP(&hlpuart1,config_handler->CRFOP)==HAL_OK){
- 8000b18:	68fb      	ldr	r3, [r7, #12]
- 8000b1a:	2225      	movs	r2, #37	@ 0x25
- 8000b1c:	5c9a      	ldrb	r2, [r3, r2]
- 8000b1e:	4b0d      	ldr	r3, [pc, #52]	@ (8000b54 <rylr998_config+0x1dc>)
- 8000b20:	0011      	movs	r1, r2
- 8000b22:	0018      	movs	r0, r3
- 8000b24:	f000 fa74 	bl	8001010 <rylr998_setCRFOP>
- 8000b28:	1e03      	subs	r3, r0, #0
- 8000b2a:	d10e      	bne.n	8000b4a <rylr998_config+0x1d2>
+		if(rylr998_setCRFOP(puartHandle,config_handler->CRFOP)==HAL_OK){
+ 8000b1c:	68fb      	ldr	r3, [r7, #12]
+ 8000b1e:	2225      	movs	r2, #37	@ 0x25
+ 8000b20:	5c9a      	ldrb	r2, [r3, r2]
+ 8000b22:	68bb      	ldr	r3, [r7, #8]
+ 8000b24:	0011      	movs	r1, r2
+ 8000b26:	0018      	movs	r0, r3
+ 8000b28:	f000 fa72 	bl	8001010 <rylr998_setCRFOP>
+ 8000b2c:	1e03      	subs	r3, r0, #0
+ 8000b2e:	d10e      	bne.n	8000b4e <rylr998_config+0x1d6>
 		while(1){
 			if(rylr998_GetInterruptFlag()){
- 8000b2c:	f000 faf2 	bl	8001114 <rylr998_GetInterruptFlag>
- 8000b30:	1e03      	subs	r3, r0, #0
- 8000b32:	d0fb      	beq.n	8000b2c <rylr998_config+0x1b4>
+ 8000b30:	f000 faf0 	bl	8001114 <rylr998_GetInterruptFlag>
+ 8000b34:	1e03      	subs	r3, r0, #0
+ 8000b36:	d0fb      	beq.n	8000b30 <rylr998_config+0x1b8>
 					if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
- 8000b34:	1dfb      	adds	r3, r7, #7
- 8000b36:	781a      	ldrb	r2, [r3, #0]
- 8000b38:	68bb      	ldr	r3, [r7, #8]
- 8000b3a:	0011      	movs	r1, r2
- 8000b3c:	0018      	movs	r0, r3
- 8000b3e:	f000 fb83 	bl	8001248 <rylr998_prase_reciver>
- 8000b42:	1e03      	subs	r3, r0, #0
- 8000b44:	d000      	beq.n	8000b48 <rylr998_config+0x1d0>
+ 8000b38:	1cfb      	adds	r3, r7, #3
+ 8000b3a:	781a      	ldrb	r2, [r3, #0]
+ 8000b3c:	687b      	ldr	r3, [r7, #4]
+ 8000b3e:	0011      	movs	r1, r2
+ 8000b40:	0018      	movs	r0, r3
+ 8000b42:	f000 fb81 	bl	8001248 <rylr998_prase_reciver>
+ 8000b46:	1e03      	subs	r3, r0, #0
+ 8000b48:	d000      	beq.n	8000b4c <rylr998_config+0x1d4>
 			if(rylr998_GetInterruptFlag()){
- 8000b46:	e7f1      	b.n	8000b2c <rylr998_config+0x1b4>
+ 8000b4a:	e7f1      	b.n	8000b30 <rylr998_config+0x1b8>
 						break;
- 8000b48:	46c0      	nop			@ (mov r8, r8)
+ 8000b4c:	46c0      	nop			@ (mov r8, r8)
 					}
 				}
 			}
 		}
 		return HAL_OK;
- 8000b4a:	2300      	movs	r3, #0
+ 8000b4e:	2300      	movs	r3, #0
 }
- 8000b4c:	0018      	movs	r0, r3
- 8000b4e:	46bd      	mov	sp, r7
- 8000b50:	b005      	add	sp, #20
- 8000b52:	bd90      	pop	{r4, r7, pc}
- 8000b54:	20000380 	.word	0x20000380
+ 8000b50:	0018      	movs	r0, r3
+ 8000b52:	46bd      	mov	sp, r7
+ 8000b54:	b005      	add	sp, #20
+ 8000b56:	bd90      	pop	{r4, r7, pc}
 
 08000b58 <rylr998_networkId>:
  * @param  puartHandle: Pointer to the UART handle used for communication.
