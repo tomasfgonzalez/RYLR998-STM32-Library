@@ -11,7 +11,14 @@
 #include <stdlib.h>
 
 
-
+/**
+ * @brief  Sends data to a specific address on the RYLR998 module using the AT command.
+ * @param  config_handler: Pointer to the config handler
+ * @param  puartHandle: Pointer to the UART handle used for communication.
+ * @param  rx_buff: Pointer to the data buffer
+ * @param  RX_BUFFER_SIZE, size of the data buffer
+ * @retval HAL_StatusTypeDef: HAL_OK if UART transmission is successful
+ */
 
 HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,UART_HandleTypeDef *puartHandle,uint8_t *rx_buff,uint8_t RX_BUFFER_SIZE){
 
