@@ -87,7 +87,7 @@ HAL_StatusTypeDef rylr998_setCRFOP(UART_HandleTypeDef *puartHandle, uint8_t CRFO
 HAL_StatusTypeDef rylr998_FACTORY(UART_HandleTypeDef *puartHandle);
 //TODO AT+UID?
 //TODO AT+VER?
-
+//TODO Any ? command e.g AT+ADDRESS?, using rylr998_FACTORY implementation should be straightforward
 
 //Rx
 RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff,uint8_t RX_BUFFER_SIZE);
