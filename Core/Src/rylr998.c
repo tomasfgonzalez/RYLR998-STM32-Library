@@ -560,7 +560,7 @@ RYLR_RX_data_t rx_packet;
 RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
 {
 
-	static uint8_t aux_buff[32];
+	static uint8_t aux_buff[255];  //it must match with RX_BUFFER_SIZE
 	static uint8_t start_indx=0;
 	static uint8_t i;
 

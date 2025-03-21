@@ -70,7 +70,7 @@ void LEDBlink(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin, uint32_t delay_ms) {
 
 
 
-#define RX_BUFFER_SIZE 32
+#define RX_BUFFER_SIZE 255
 uint8_t rx_buff[RX_BUFFER_SIZE];  // Reception buffer
 
 

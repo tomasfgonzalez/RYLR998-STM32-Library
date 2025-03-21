@@ -66,15 +66,6 @@ typedef struct{
 }RYLR_RX_data_t;
 
 
-typedef struct
-{
-	uint8_t 			address[2];
-	uint8_t				payloadLength;
-	uint8_t				rxBuffer[240];
-	int8_t				rssi;
-	uint8_t				snr;
-
-}RYLR_reciver_t;
 
 extern RYLR_RX_data_t rx_packet;
 

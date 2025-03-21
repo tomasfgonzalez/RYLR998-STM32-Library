@@ -21,9 +21,9 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   8 .data         00000068  20000000  08006150  00008000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  9 .bss          000004dc  20000068  080061b8  00008068  2**2
+  9 .bss          00000698  20000068  080061b8  00008068  2**2
                   ALLOC
- 10 ._user_heap_stack 00000604  20000544  080061b8  00008544  2**0
+ 10 ._user_heap_stack 00000600  20000700  080061b8  00008700  2**0
                   ALLOC
  11 .ARM.attributes 00000028  00000000  00000000  00008068  2**0
                   CONTENTS, READONLY
@@ -39,9 +39,9 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  17 .debug_line   0000d598  00000000  00000000  00028e3a  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000689da  00000000  00000000  000363d2  2**0
+ 18 .debug_str    000689db  00000000  00000000  000363d2  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  0009edac  2**0
+ 19 .comment      00000043  00000000  00000000  0009edad  2**0
                   CONTENTS, READONLY
  20 .debug_frame  00002ab8  00000000  00000000  0009edf0  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
@@ -968,7 +968,7 @@ void MX_GPIO_Init(void)
  8000788:	50000400 	.word	0x50000400
 
 0800078c <HAL_UARTEx_RxEventCallback>:
-#define RX_BUFFER_SIZE 32
+#define RX_BUFFER_SIZE 255
 uint8_t rx_buff[RX_BUFFER_SIZE];  // Reception buffer
 
 
@@ -1004,7 +1004,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
 			HAL_UARTEx_ReceiveToIdle_DMA(huart, rx_buff, RX_BUFFER_SIZE);
  80007b4:	4905      	ldr	r1, [pc, #20]	@ (80007cc <HAL_UARTEx_RxEventCallback+0x40>)
  80007b6:	687b      	ldr	r3, [r7, #4]
- 80007b8:	2220      	movs	r2, #32
+ 80007b8:	22ff      	movs	r2, #255	@ 0xff
  80007ba:	0018      	movs	r0, r3
  80007bc:	f003 ff97 	bl	80046ee <HAL_UARTEx_ReceiveToIdle_DMA>
 	}
@@ -1013,7 +1013,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
  80007c2:	46bd      	mov	sp, r7
  80007c4:	b002      	add	sp, #8
  80007c6:	bd80      	pop	{r7, pc}
- 80007c8:	200001c4 	.word	0x200001c4
+ 80007c8:	20000380 	.word	0x20000380
  80007cc:	20000084 	.word	0x20000084
 
 080007d0 <main>:
@@ -1061,7 +1061,7 @@ int main(void)
 	HAL_UARTEx_ReceiveToIdle_DMA(&hlpuart1, rx_buff, RX_BUFFER_SIZE);
  80007ee:	4920      	ldr	r1, [pc, #128]	@ (8000870 <main+0xa0>)
  80007f0:	4b20      	ldr	r3, [pc, #128]	@ (8000874 <main+0xa4>)
- 80007f2:	2220      	movs	r2, #32
+ 80007f2:	22ff      	movs	r2, #255	@ 0xff
  80007f4:	0018      	movs	r0, r3
  80007f6:	f003 ff7a 	bl	80046ee <HAL_UARTEx_ReceiveToIdle_DMA>
 
@@ -1137,7 +1137,7 @@ int main(void)
 	if (rylr998_config(&config_handler,rx_buff, RX_BUFFER_SIZE)==HAL_OK){
  8000860:	4903      	ldr	r1, [pc, #12]	@ (8000870 <main+0xa0>)
  8000862:	003b      	movs	r3, r7
- 8000864:	2220      	movs	r2, #32
+ 8000864:	22ff      	movs	r2, #255	@ 0xff
  8000866:	0018      	movs	r0, r3
  8000868:	f000 f886 	bl	8000978 <rylr998_config>
 		//any errors on RX will end up in a while internal loop
@@ -1149,7 +1149,7 @@ int main(void)
  800086c:	46c0      	nop			@ (mov r8, r8)
  800086e:	e7fd      	b.n	800086c <main+0x9c>
  8000870:	20000084 	.word	0x20000084
- 8000874:	200001c4 	.word	0x200001c4
+ 8000874:	20000380 	.word	0x20000380
  8000878:	3689cac0 	.word	0x3689cac0
  800087c:	08005d90 	.word	0x08005d90
 
@@ -1660,7 +1660,7 @@ HAL_StatusTypeDef rylr998_config(RYLR_config_t *config_handler,uint8_t *rx_buff,
  8000b4e:	46bd      	mov	sp, r7
  8000b50:	b005      	add	sp, #20
  8000b52:	bd90      	pop	{r4, r7, pc}
- 8000b54:	200001c4 	.word	0x200001c4
+ 8000b54:	20000380 	.word	0x20000380
 
 08000b58 <rylr998_networkId>:
  * @param  puartHandle: Pointer to the UART handle used for communication.
@@ -2629,7 +2629,7 @@ void rylr998_SetInterruptFlag(void){
  800110a:	46c0      	nop			@ (mov r8, r8)
  800110c:	46bd      	mov	sp, r7
  800110e:	bd80      	pop	{r7, pc}
- 8001110:	200000a4 	.word	0x200000a4
+ 8001110:	20000183 	.word	0x20000183
 
 08001114 <rylr998_GetInterruptFlag>:
 /**
@@ -2648,7 +2648,7 @@ uint8_t rylr998_GetInterruptFlag(void){
  800111e:	46bd      	mov	sp, r7
  8001120:	bd80      	pop	{r7, pc}
  8001122:	46c0      	nop			@ (mov r8, r8)
- 8001124:	200000a4 	.word	0x200000a4
+ 8001124:	20000183 	.word	0x20000183
 
 08001128 <rylr998_ClearInterruptFlag>:
 
@@ -2667,7 +2667,7 @@ void rylr998_ClearInterruptFlag(void){
  8001132:	46c0      	nop			@ (mov r8, r8)
  8001134:	46bd      	mov	sp, r7
  8001136:	bd80      	pop	{r7, pc}
- 8001138:	200000a4 	.word	0x200000a4
+ 8001138:	20000183 	.word	0x20000183
 
 0800113c <rylr998_ResponseFind>:
  * @params RxBuffer sorted
@@ -2844,7 +2844,7 @@ RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
  8001252:	1cfb      	adds	r3, r7, #3
  8001254:	701a      	strb	r2, [r3, #0]
 
-	static uint8_t aux_buff[32];
+	static uint8_t aux_buff[255];  //it must match with RX_BUFFER_SIZE
 	static uint8_t start_indx=0;
 	static uint8_t i;
 
@@ -3136,14 +3136,14 @@ RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
  800142e:	b004      	add	sp, #16
  8001430:	bdb0      	pop	{r4, r5, r7, pc}
  8001432:	46c0      	nop			@ (mov r8, r8)
- 8001434:	2000019e 	.word	0x2000019e
- 8001438:	2000019f 	.word	0x2000019f
- 800143c:	200001a0 	.word	0x200001a0
+ 8001434:	2000027a 	.word	0x2000027a
+ 8001438:	2000027b 	.word	0x2000027b
+ 800143c:	2000027c 	.word	0x2000027c
  8001440:	08005ec4 	.word	0x08005ec4
  8001444:	08005ebc 	.word	0x08005ebc
  8001448:	08005ec0 	.word	0x08005ec0
- 800144c:	200000a8 	.word	0x200000a8
- 8001450:	200000ab 	.word	0x200000ab
+ 800144c:	20000184 	.word	0x20000184
+ 8001450:	20000187 	.word	0x20000187
 
 08001454 <HAL_MspInit>:
 /* USER CODE END 0 */
@@ -3307,8 +3307,8 @@ void DMA1_Channel2_3_IRQHandler(void)
  80014c6:	46bd      	mov	sp, r7
  80014c8:	bd80      	pop	{r7, pc}
  80014ca:	46c0      	nop			@ (mov r8, r8)
- 80014cc:	2000031c 	.word	0x2000031c
- 80014d0:	200002d4 	.word	0x200002d4
+ 80014cc:	200004d8 	.word	0x200004d8
+ 80014d0:	20000490 	.word	0x20000490
 
 080014d4 <DMA1_Channel4_5_6_7_IRQHandler>:
 
@@ -3338,8 +3338,8 @@ void DMA1_Channel4_5_6_7_IRQHandler(void)
  80014ea:	46bd      	mov	sp, r7
  80014ec:	bd80      	pop	{r7, pc}
  80014ee:	46c0      	nop			@ (mov r8, r8)
- 80014f0:	200003ac 	.word	0x200003ac
- 80014f4:	20000364 	.word	0x20000364
+ 80014f0:	20000568 	.word	0x20000568
+ 80014f4:	20000520 	.word	0x20000520
 
 080014f8 <USART2_IRQHandler>:
 
@@ -3365,7 +3365,7 @@ void USART2_IRQHandler(void)
  8001506:	46bd      	mov	sp, r7
  8001508:	bd80      	pop	{r7, pc}
  800150a:	46c0      	nop			@ (mov r8, r8)
- 800150c:	2000024c 	.word	0x2000024c
+ 800150c:	20000408 	.word	0x20000408
 
 08001510 <LPUART1_IRQHandler>:
 
@@ -3391,7 +3391,7 @@ void LPUART1_IRQHandler(void)
  800151e:	46bd      	mov	sp, r7
  8001520:	bd80      	pop	{r7, pc}
  8001522:	46c0      	nop			@ (mov r8, r8)
- 8001524:	200001c4 	.word	0x200001c4
+ 8001524:	20000380 	.word	0x20000380
 
 08001528 <_getpid>:
 void initialise_monitor_handles()
@@ -3701,8 +3701,8 @@ void *_sbrk(ptrdiff_t incr)
  8001692:	bd80      	pop	{r7, pc}
  8001694:	20002000 	.word	0x20002000
  8001698:	00000400 	.word	0x00000400
- 800169c:	200001c0 	.word	0x200001c0
- 80016a0:	20000548 	.word	0x20000548
+ 800169c:	2000037c 	.word	0x2000037c
+ 80016a0:	20000700 	.word	0x20000700
 
 080016a4 <SystemInit>:
   * @brief  Setup the microcontroller system.
@@ -3793,7 +3793,7 @@ void MX_LPUART1_UART_Init(void)
  80016fe:	46bd      	mov	sp, r7
  8001700:	bd80      	pop	{r7, pc}
  8001702:	46c0      	nop			@ (mov r8, r8)
- 8001704:	200001c4 	.word	0x200001c4
+ 8001704:	20000380 	.word	0x20000380
  8001708:	40004800 	.word	0x40004800
 
 0800170c <MX_USART2_UART_Init>:
@@ -3867,7 +3867,7 @@ void MX_USART2_UART_Init(void)
  800175e:	46c0      	nop			@ (mov r8, r8)
  8001760:	46bd      	mov	sp, r7
  8001762:	bd80      	pop	{r7, pc}
- 8001764:	2000024c 	.word	0x2000024c
+ 8001764:	20000408 	.word	0x20000408
  8001768:	40004400 	.word	0x40004400
 
 0800176c <HAL_UART_MspInit>:
@@ -4257,14 +4257,14 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
  80019b6:	bd90      	pop	{r4, r7, pc}
  80019b8:	40004800 	.word	0x40004800
  80019bc:	40021000 	.word	0x40021000
- 80019c0:	200002d4 	.word	0x200002d4
+ 80019c0:	20000490 	.word	0x20000490
  80019c4:	40020030 	.word	0x40020030
- 80019c8:	2000031c 	.word	0x2000031c
+ 80019c8:	200004d8 	.word	0x200004d8
  80019cc:	4002001c 	.word	0x4002001c
  80019d0:	40004400 	.word	0x40004400
- 80019d4:	20000364 	.word	0x20000364
+ 80019d4:	20000520 	.word	0x20000520
  80019d8:	40020058 	.word	0x40020058
- 80019dc:	200003ac 	.word	0x200003ac
+ 80019dc:	20000568 	.word	0x20000568
  80019e0:	40020044 	.word	0x40020044
 
 080019e4 <Reset_Handler>:
@@ -4363,7 +4363,7 @@ Reset_Handler:     ldr   r0, =_estack
   ldr r2, =_sbss
  8001a2c:	20000068 	.word	0x20000068
   ldr r4, =_ebss
- 8001a30:	20000544 	.word	0x20000544
+ 8001a30:	20000700 	.word	0x20000700
 
 08001a34 <ADC1_COMP_IRQHandler>:
  * @retval : None
@@ -4533,7 +4533,7 @@ __weak void HAL_IncTick(void)
  8001af8:	bd80      	pop	{r7, pc}
  8001afa:	46c0      	nop			@ (mov r8, r8)
  8001afc:	20000008 	.word	0x20000008
- 8001b00:	200003f4 	.word	0x200003f4
+ 8001b00:	200005b0 	.word	0x200005b0
 
 08001b04 <HAL_GetTick>:
   * @note This function is declared as __weak to be overwritten in case of other
@@ -4552,7 +4552,7 @@ __weak uint32_t HAL_GetTick(void)
  8001b0e:	46bd      	mov	sp, r7
  8001b10:	bd80      	pop	{r7, pc}
  8001b12:	46c0      	nop			@ (mov r8, r8)
- 8001b14:	200003f4 	.word	0x200003f4
+ 8001b14:	200005b0 	.word	0x200005b0
 
 08001b18 <__NVIC_EnableIRQ>:
   \details Enables a device specific interrupt in the NVIC interrupt controller.
@@ -12879,7 +12879,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  800481a:	3001      	adds	r0, #1
  800481c:	d1f2      	bne.n	8004804 <sbrk_aligned+0x24>
  800481e:	e7ef      	b.n	8004800 <sbrk_aligned+0x20>
- 8004820:	200003f8 	.word	0x200003f8
+ 8004820:	200005b4 	.word	0x200005b4
 
 08004824 <_malloc_r>:
  8004824:	b5f7      	push	{r0, r1, r2, r4, r5, r6, r7, lr}
@@ -13002,7 +13002,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  800491a:	6007      	str	r7, [r0, #0]
  800491c:	e7da      	b.n	80048d4 <_malloc_r+0xb0>
  800491e:	46c0      	nop			@ (mov r8, r8)
- 8004920:	200003fc 	.word	0x200003fc
+ 8004920:	200005b8 	.word	0x200005b8
 
 08004924 <__malloc_lock>:
  8004924:	b510      	push	{r4, lr}
@@ -13010,7 +13010,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8004928:	f000 fafb 	bl	8004f22 <__retarget_lock_acquire_recursive>
  800492c:	bd10      	pop	{r4, pc}
  800492e:	46c0      	nop			@ (mov r8, r8)
- 8004930:	20000540 	.word	0x20000540
+ 8004930:	200006fc 	.word	0x200006fc
 
 08004934 <__malloc_unlock>:
  8004934:	b510      	push	{r4, lr}
@@ -13018,7 +13018,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8004938:	f000 faf4 	bl	8004f24 <__retarget_lock_release_recursive>
  800493c:	bd10      	pop	{r4, pc}
  800493e:	46c0      	nop			@ (mov r8, r8)
- 8004940:	20000540 	.word	0x20000540
+ 8004940:	200006fc 	.word	0x200006fc
 
 08004944 <_strtol_l.constprop.0>:
  8004944:	b5f0      	push	{r4, r5, r6, r7, lr}
@@ -13211,9 +13211,9 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8004ac4:	08004c89 	.word	0x08004c89
  8004ac8:	08004cc1 	.word	0x08004cc1
  8004acc:	08004ced 	.word	0x08004ced
- 8004ad0:	20000400 	.word	0x20000400
- 8004ad4:	20000468 	.word	0x20000468
- 8004ad8:	200004d0 	.word	0x200004d0
+ 8004ad0:	200005bc 	.word	0x200005bc
+ 8004ad4:	20000624 	.word	0x20000624
+ 8004ad8:	2000068c 	.word	0x2000068c
 
 08004adc <stdio_exit_handler>:
  8004adc:	b510      	push	{r4, lr}
@@ -13249,9 +13249,9 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8004b20:	f000 fdd4 	bl	80056cc <_fflush_r>
  8004b24:	bd10      	pop	{r4, pc}
  8004b26:	46c0      	nop			@ (mov r8, r8)
- 8004b28:	20000400 	.word	0x20000400
- 8004b2c:	20000468 	.word	0x20000468
- 8004b30:	200004d0 	.word	0x200004d0
+ 8004b28:	200005bc 	.word	0x200005bc
+ 8004b2c:	20000624 	.word	0x20000624
+ 8004b30:	2000068c 	.word	0x2000068c
 
 08004b34 <global_stdio_init.part.0>:
  8004b34:	b510      	push	{r4, lr}
@@ -13271,11 +13271,11 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8004b54:	4805      	ldr	r0, [pc, #20]	@ (8004b6c <global_stdio_init.part.0+0x38>)
  8004b56:	f7ff ff8b 	bl	8004a70 <std>
  8004b5a:	bd10      	pop	{r4, pc}
- 8004b5c:	20000538 	.word	0x20000538
+ 8004b5c:	200006f4 	.word	0x200006f4
  8004b60:	08004add 	.word	0x08004add
- 8004b64:	20000400 	.word	0x20000400
- 8004b68:	20000468 	.word	0x20000468
- 8004b6c:	200004d0 	.word	0x200004d0
+ 8004b64:	200005bc 	.word	0x200005bc
+ 8004b68:	20000624 	.word	0x20000624
+ 8004b6c:	2000068c 	.word	0x2000068c
 
 08004b70 <__sfp_lock_acquire>:
  8004b70:	b510      	push	{r4, lr}
@@ -13283,7 +13283,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8004b74:	f000 f9d5 	bl	8004f22 <__retarget_lock_acquire_recursive>
  8004b78:	bd10      	pop	{r4, pc}
  8004b7a:	46c0      	nop			@ (mov r8, r8)
- 8004b7c:	20000541 	.word	0x20000541
+ 8004b7c:	200006fd 	.word	0x200006fd
 
 08004b80 <__sfp_lock_release>:
  8004b80:	b510      	push	{r4, lr}
@@ -13291,7 +13291,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8004b84:	f000 f9ce 	bl	8004f24 <__retarget_lock_release_recursive>
  8004b88:	bd10      	pop	{r4, pc}
  8004b8a:	46c0      	nop			@ (mov r8, r8)
- 8004b8c:	20000541 	.word	0x20000541
+ 8004b8c:	200006fd 	.word	0x200006fd
 
 08004b90 <__sinit>:
  8004b90:	b510      	push	{r4, lr}
@@ -13312,7 +13312,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8004bb4:	e7f3      	b.n	8004b9e <__sinit+0xe>
  8004bb6:	46c0      	nop			@ (mov r8, r8)
  8004bb8:	08004af9 	.word	0x08004af9
- 8004bbc:	20000538 	.word	0x20000538
+ 8004bbc:	200006f4 	.word	0x200006f4
 
 08004bc0 <_fwalk_sglue>:
  8004bc0:	b5f7      	push	{r0, r1, r2, r4, r5, r6, r7, lr}
@@ -13630,7 +13630,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8004e26:	6023      	str	r3, [r4, #0]
  8004e28:	bd70      	pop	{r4, r5, r6, pc}
  8004e2a:	46c0      	nop			@ (mov r8, r8)
- 8004e2c:	2000053c 	.word	0x2000053c
+ 8004e2c:	200006f8 	.word	0x200006f8
 
 08004e30 <_lseek_r>:
  8004e30:	b570      	push	{r4, r5, r6, lr}
@@ -13650,7 +13650,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8004e4e:	6023      	str	r3, [r4, #0]
  8004e50:	bd70      	pop	{r4, r5, r6, pc}
  8004e52:	46c0      	nop			@ (mov r8, r8)
- 8004e54:	2000053c 	.word	0x2000053c
+ 8004e54:	200006f8 	.word	0x200006f8
 
 08004e58 <_read_r>:
  8004e58:	b570      	push	{r4, r5, r6, lr}
@@ -13670,7 +13670,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8004e76:	6023      	str	r3, [r4, #0]
  8004e78:	bd70      	pop	{r4, r5, r6, pc}
  8004e7a:	46c0      	nop			@ (mov r8, r8)
- 8004e7c:	2000053c 	.word	0x2000053c
+ 8004e7c:	200006f8 	.word	0x200006f8
 
 08004e80 <_sbrk_r>:
  8004e80:	2300      	movs	r3, #0
@@ -13688,7 +13688,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8004e9a:	6023      	str	r3, [r4, #0]
  8004e9c:	bd70      	pop	{r4, r5, r6, pc}
  8004e9e:	46c0      	nop			@ (mov r8, r8)
- 8004ea0:	2000053c 	.word	0x2000053c
+ 8004ea0:	200006f8 	.word	0x200006f8
 
 08004ea4 <_write_r>:
  8004ea4:	b570      	push	{r4, r5, r6, lr}
@@ -13708,7 +13708,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8004ec2:	6023      	str	r3, [r4, #0]
  8004ec4:	bd70      	pop	{r4, r5, r6, pc}
  8004ec6:	46c0      	nop			@ (mov r8, r8)
- 8004ec8:	2000053c 	.word	0x2000053c
+ 8004ec8:	200006f8 	.word	0x200006f8
 
 08004ecc <__errno>:
  8004ecc:	4b01      	ldr	r3, [pc, #4]	@ (8004ed4 <__errno+0x8>)
@@ -13867,7 +13867,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8004ffe:	6054      	str	r4, [r2, #4]
  8005000:	e7ca      	b.n	8004f98 <_free_r+0x24>
  8005002:	46c0      	nop			@ (mov r8, r8)
- 8005004:	200003fc 	.word	0x200003fc
+ 8005004:	200005b8 	.word	0x200005b8
 
 08005008 <__ssputs_r>:
  8005008:	b5f0      	push	{r4, r5, r6, r7, lr}
@@ -15389,7 +15389,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8005c36:	d000      	beq.n	8005c3a <_kill_r+0x1e>
  8005c38:	6023      	str	r3, [r4, #0]
  8005c3a:	bd70      	pop	{r4, r5, r6, pc}
- 8005c3c:	2000053c 	.word	0x2000053c
+ 8005c3c:	200006f8 	.word	0x200006f8
 
 08005c40 <_getpid_r>:
  8005c40:	b510      	push	{r4, lr}
@@ -15529,7 +15529,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8005d4a:	d000      	beq.n	8005d4e <_fstat_r+0x1e>
  8005d4c:	6023      	str	r3, [r4, #0]
  8005d4e:	bd70      	pop	{r4, r5, r6, pc}
- 8005d50:	2000053c 	.word	0x2000053c
+ 8005d50:	200006f8 	.word	0x200006f8
 
 08005d54 <_isatty_r>:
  8005d54:	2300      	movs	r3, #0
@@ -15547,7 +15547,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef *huart, uint8_
  8005d6e:	6023      	str	r3, [r4, #0]
  8005d70:	bd70      	pop	{r4, r5, r6, pc}
  8005d72:	46c0      	nop			@ (mov r8, r8)
- 8005d74:	2000053c 	.word	0x2000053c
+ 8005d74:	200006f8 	.word	0x200006f8
 
 08005d78 <_init>:
  8005d78:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
