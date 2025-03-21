@@ -1988,7 +1988,7 @@ HAL_StatusTypeDef rylr998_setParameter(UART_HandleTypeDef *puartHandle, uint8_t 
  * @retval HAL_StatusTypeDef: HAL_OK if the command is successfully transmitted, HAL_ERROR if validation fails or memory allocation fails.
  *
  */
-HAL_StatusTypeDef rylr998_mode(UART_HandleTypeDef *puartHandle, uint8_t mode, uint32_t rxTime, uint32_t LowSpeedTime) {//TODO check if it works
+HAL_StatusTypeDef rylr998_mode(UART_HandleTypeDef *puartHandle, uint8_t mode, uint32_t rxTime, uint32_t LowSpeedTime) {
  8000d48:	b5b0      	push	{r4, r5, r7, lr}
  8000d4a:	b090      	sub	sp, #64	@ 0x40
  8000d4c:	af02      	add	r7, sp, #8
@@ -2151,7 +2151,7 @@ HAL_StatusTypeDef rylr998_mode(UART_HandleTypeDef *puartHandle, uint8_t mode, ui
  * @retval HAL_StatusTypeDef: HAL_OK if the command is successfully transmitted, HAL_ERROR if the baud rate is invalid or memory allocation fails.
  *
  */
-HAL_StatusTypeDef rylr998_setBaudRate(UART_HandleTypeDef *puartHandle, uint32_t baudRate) { //TODO check if it works
+HAL_StatusTypeDef rylr998_setBaudRate(UART_HandleTypeDef *puartHandle, uint32_t baudRate) {
  8000e48:	b5b0      	push	{r4, r5, r7, lr}
  8000e4a:	b088      	sub	sp, #32
  8000e4c:	af00      	add	r7, sp, #0
@@ -2241,7 +2241,7 @@ HAL_StatusTypeDef rylr998_setBaudRate(UART_HandleTypeDef *puartHandle, uint32_t 
  * @retval HAL_StatusTypeDef: HAL_OK if the command is successfully transmitted, HAL_ERROR if the frequency is invalid or memory allocation fails.
  *
  */
-HAL_StatusTypeDef rylr998_setBand(UART_HandleTypeDef *puartHandle, uint32_t frequency,uint8_t memory) { //TODO check if it works
+HAL_StatusTypeDef rylr998_setBand(UART_HandleTypeDef *puartHandle, uint32_t frequency,uint8_t memory) {
  8000ed0:	b5b0      	push	{r4, r5, r7, lr}
  8000ed2:	b08c      	sub	sp, #48	@ 0x30
  8000ed4:	af00      	add	r7, sp, #0

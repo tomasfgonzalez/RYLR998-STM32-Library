@@ -285,7 +285,7 @@ HAL_StatusTypeDef rylr998_reset(UART_HandleTypeDef *puartHandle) {
  * @retval HAL_StatusTypeDef: HAL_OK if the command is successfully transmitted, HAL_ERROR if validation fails or memory allocation fails.
  *
  */
-HAL_StatusTypeDef rylr998_mode(UART_HandleTypeDef *puartHandle, uint8_t mode, uint32_t rxTime, uint32_t LowSpeedTime) {//TODO check if it works
+HAL_StatusTypeDef rylr998_mode(UART_HandleTypeDef *puartHandle, uint8_t mode, uint32_t rxTime, uint32_t LowSpeedTime) {
     HAL_StatusTypeDef ret = HAL_ERROR;
     char uartTxBuffer[30] = {0};  //
 
@@ -328,7 +328,7 @@ HAL_StatusTypeDef rylr998_mode(UART_HandleTypeDef *puartHandle, uint8_t mode, ui
  * @retval HAL_StatusTypeDef: HAL_OK if the command is successfully transmitted, HAL_ERROR if the baud rate is invalid or memory allocation fails.
  *
  */
-HAL_StatusTypeDef rylr998_setBaudRate(UART_HandleTypeDef *puartHandle, uint32_t baudRate) { //TODO check if it works
+HAL_StatusTypeDef rylr998_setBaudRate(UART_HandleTypeDef *puartHandle, uint32_t baudRate) {
     HAL_StatusTypeDef ret = HAL_ERROR;
     char uartTxBuffer[16] = {0};
 
@@ -356,7 +356,7 @@ HAL_StatusTypeDef rylr998_setBaudRate(UART_HandleTypeDef *puartHandle, uint32_t 
  * @retval HAL_StatusTypeDef: HAL_OK if the command is successfully transmitted, HAL_ERROR if the frequency is invalid or memory allocation fails.
  *
  */
-HAL_StatusTypeDef rylr998_setBand(UART_HandleTypeDef *puartHandle, uint32_t frequency,uint8_t memory) { //TODO check if it works
+HAL_StatusTypeDef rylr998_setBand(UART_HandleTypeDef *puartHandle, uint32_t frequency,uint8_t memory) {
     HAL_StatusTypeDef ret = HAL_ERROR;
     char uartTxBuffer[22] = {0};
     int packetSize=0;
