@@ -560,30 +560,28 @@ RYLR_RX_data_t rx_packet;
 RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
 {
 
-	static uint8_t aux_buff[255];
+	static uint8_t aux_buff[32];
 	static uint8_t start_indx=0;
 	static uint8_t i;
 
-	if(pBuff[start_indx]=='\n'){   //RYLR_IPR returns +RYLR_IPR=115200\r\n\n for some reason so this fixes it
-									//TODO: improvement: search for the '+' in ASCII and then, save it in the aux_buff while keeping track of the index
-		start_indx=start_indx+1;
+	for(i = 0; i <RX_BUFFER_SIZE; i++){   //Looks for the index of the starting char
+
+		if(pBuff[(start_indx+i) % RX_BUFFER_SIZE]=='+'){
+			start_indx=(start_indx + i) % RX_BUFFER_SIZE;
+			break;
+		}
 	}
 
 	for (i = 0; i <RX_BUFFER_SIZE; i++){
-	    aux_buff[i] = pBuff[(start_indx + i) % RX_BUFFER_SIZE];
-	    if(aux_buff[i]=='\n'){
-	    	rylr998_ClearInterruptFlag();
-	    	break;
-	    }
-	    if(i==RX_BUFFER_SIZE && aux_buff[i]!='\n'){
-	    }
 
+		aux_buff[i] = pBuff[(start_indx + i) % RX_BUFFER_SIZE];
+
+		if(aux_buff[i]=='\n'){
+			break;
+		}
 	}
-
+	rylr998_ClearInterruptFlag();
 	start_indx=(start_indx + i+1) % RX_BUFFER_SIZE;
-	i=0;
-
-
 
             RYLR_RX_command_t cmd = rylr998_ResponseFind(aux_buff);
 
@@ -642,7 +640,7 @@ RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
                     break;
             }
 
-            rylr998_ClearInterruptFlag();
+
             return cmd;
 }
 
