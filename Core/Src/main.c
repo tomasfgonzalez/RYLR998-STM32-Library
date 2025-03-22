@@ -70,23 +70,6 @@ void LEDBlink(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin, uint32_t delay_ms) {
 
 
 
-#define RX_BUFFER_SIZE 255
-uint8_t rx_buff[RX_BUFFER_SIZE];  // Reception buffer
-
-
-
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
-    // Check if the event is an idle line event
-
-	if((huart == &hlpuart1)){
-		//if (HAL_UARTEx_GetRxEventType(huart) == HAL_UART_RXEVENT_IDLE ||HAL_UARTEx_GetRxEventType(huart) == HAL_UART_RXEVENT_HT) {
-		//For some reason, the RXevent IDLE tends to not work right
-			if (rx_buff[Size-1]=='\n'){
-			rylr998_SetInterruptFlag();
-			}
-			HAL_UARTEx_ReceiveToIdle_DMA(huart, rx_buff, RX_BUFFER_SIZE);
-	}
-}
 
 
 /* USER CODE END 0 */
@@ -129,32 +112,12 @@ int main(void)
 
 
 	//Start RX IRQ
-	HAL_UARTEx_ReceiveToIdle_DMA(&hlpuart1, rx_buff, RX_BUFFER_SIZE);
+	INIT_RX_UART2();
 
 
 	//Configuration parameters
-	RYLR_config_t config_handler;
-	config_handler.networkId =18;
-	config_handler.address =1;
-	config_handler.SF=9;
-	config_handler.BW=7;
-	config_handler.CR=1;
-	config_handler.ProgramedPreamble=12;
-	config_handler.mode=0;
-	config_handler.rxTime=0;
-	config_handler.LowSpeedTime=0;
-	config_handler.baudRate=115200;
-	config_handler.frequency=915000000;
-	config_handler.memory=1;
-	strcpy(config_handler.password, "FFFFFFFF");
-	config_handler.CRFOP=22;
 
-	//Start the configuration
-	if (rylr998_config(&config_handler,&hlpuart1,rx_buff, RX_BUFFER_SIZE)==HAL_OK){
-		//CFG was successful
-	}else{
-		//any errors on RX will end up in a while internal loop
-	}
+	rylr998_setChannel(1,0);
 
 
 

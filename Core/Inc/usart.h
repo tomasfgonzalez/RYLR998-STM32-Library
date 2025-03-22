@@ -30,6 +30,9 @@ extern "C" {
 
 /* USER CODE BEGIN Includes */
 
+#define RX_BUFF 64
+extern uint8_t rx_buff[RX_BUFF];  // Reception buffer
+
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef hlpuart1;
@@ -37,7 +40,7 @@ extern UART_HandleTypeDef hlpuart1;
 extern UART_HandleTypeDef huart2;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 /* USER CODE BEGIN Private defines */
-
+void INIT_RX_UART2(void);
 /* USER CODE END Private defines */
 
 void MX_LPUART1_UART_Init(void);

@@ -19,7 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
-
+#include "rylr998.h"
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -275,7 +275,25 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
   /* USER CODE END USART2_MspDeInit 1 */
   }
 }
-
+uint8_t rx_buff[RX_BUFF];
 /* USER CODE BEGIN 1 */
+void INIT_RX_UART2(void){
+HAL_UARTEx_ReceiveToIdle_DMA(&hlpuart1, rx_buff, RX_BUFF);
+}
+
+
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
+    // Check if the event is an idle line event
+
+	if((huart == &hlpuart1)){
+		//if (HAL_UARTEx_GetRxEventType(huart) == HAL_UART_RXEVENT_IDLE ||HAL_UARTEx_GetRxEventType(huart) == HAL_UART_RXEVENT_HT) {
+		//For some reason, the RXevent IDLE tends to not work right
+			if (rx_buff[Size-1]=='\n'){
+			rylr998_SetInterruptFlag();
+			}
+			HAL_UARTEx_ReceiveToIdle_DMA(huart, rx_buff, RX_BUFF);
+	}
+}
 
 /* USER CODE END 1 */
