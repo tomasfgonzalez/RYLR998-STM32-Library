@@ -290,10 +290,11 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
 		//if (HAL_UARTEx_GetRxEventType(huart) == HAL_UART_RXEVENT_IDLE ||HAL_UARTEx_GetRxEventType(huart) == HAL_UART_RXEVENT_HT) {
 		//For some reason, the RXevent IDLE tends to not work right
 			if (rx_buff[Size-1]=='\n'){
-			rylr998_SetInterruptFlag();
+
+			rylr998_SetInterruptFlag(1);
 			}
-			HAL_UARTEx_ReceiveToIdle_DMA(huart, rx_buff, RX_BUFF);
+ 			HAL_UARTEx_ReceiveToIdle_DMA(huart, rx_buff, RX_BUFF);
 	}
-}
+ }
 
 /* USER CODE END 1 */

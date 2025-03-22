@@ -13,7 +13,7 @@
 void rylr998_setChannel(uint8_t ch,uint8_t address){
 	RYLR_config_t config_handler;
 
-	if(ch){
+	if(ch){                             //MAIN CHANNEL
 	config_handler.networkId =18;
 	config_handler.address =address;
 	config_handler.SF=9;
@@ -26,9 +26,9 @@ void rylr998_setChannel(uint8_t ch,uint8_t address){
 	//config_handler.baudRate=115200;
 	config_handler.frequency=915000000;
 	config_handler.memory=1;
-	strcpy(config_handler.password, "FFFFFFFF"); //we dont want the \0 terminator so we overflow
+	//strcpy(config_handler.password, "FFFFFFFF"); //we dont want the \0 terminator so we overflow, estan comentados para ver los msj
 	config_handler.CRFOP=22;
-	}else{
+	}else{     							//AUX CHANNEL
 	config_handler.networkId =18;
 	config_handler.address =address;
 	config_handler.SF=9;
@@ -41,7 +41,7 @@ void rylr998_setChannel(uint8_t ch,uint8_t address){
 	//config_handler.baudRate=115200;
 	config_handler.frequency=915000000;
 	config_handler.memory=1;
-	strcpy(config_handler.password, "FFFFFFFF"); //we dont want the \0 terminator so we overflow
+	//strcpy(config_handler.password, "FFFFFFFF"); //we dont want the \0 terminator so we overflow
 	config_handler.CRFOP=22;
 	}
 	rylr998_config(&config_handler);
@@ -71,8 +71,8 @@ void rylr998_config(RYLR_config_t *config_handler){
 		rylr998_setBand(config_handler->frequency,config_handler->memory);
 		rylr998_getCommand(RYLR_OK,rx_buff,RX_BUFF);
 		//PASSWORD
-		rylr998_setCPIN(config_handler->password);
-		rylr998_getCommand(RYLR_OK,rx_buff,RX_BUFF);
+		//rylr998_setCPIN(config_handler->password);
+		//rylr998_getCommand(RYLR_OK,rx_buff,RX_BUFF);
 		//RF Output
 		rylr998_setCRFOP(config_handler->CRFOP);
 		rylr998_getCommand(RYLR_OK,rx_buff,RX_BUFF);
@@ -80,51 +80,51 @@ void rylr998_config(RYLR_config_t *config_handler){
 
 
 
+#define TX_BUFFER_SIZE 128 //118
+static char uartTxBuffer[TX_BUFFER_SIZE];
 
-HAL_StatusTypeDef rylr998_sendData(UART_HandleTypeDef *puartHandle, uint16_t address, uint8_t *data, uint8_t data_length) {
-    HAL_StatusTypeDef ret = HAL_ERROR;
-    uint16_t packetSize = snprintf(NULL, 0, "AT+SEND=%u,%u,", address, data_length) + data_length + 2;  // +2 for \r\n
-
-    // Allocate buffer dynamically
-    uint8_t *uartTxBuffer = (uint8_t *)malloc(packetSize);
-    if (uartTxBuffer == NULL) {
-        return HAL_ERROR;  // Allocation failed
+int count_digits(int32_t num) {
+    if (num == 0) return 1; // El número 0 tiene un solo dígito
+    int count = 0;
+    if (num<0){
+    	count=1;
     }
-
-    // Construct the AT command
-    uint16_t offset = snprintf((char*)uartTxBuffer, packetSize, "AT+SEND=%u,%u,", address, data_length);
-
-    // Append data
-    memcpy(uartTxBuffer + offset, data, data_length);
-    offset += data_length;
-
-    // Append command terminator
-    uartTxBuffer[offset++] = '\r';
-    uartTxBuffer[offset++] = '\n';
-
-    // Transmit command over UART
-    ret = HAL_UART_Transmit_DMA(puartHandle, uartTxBuffer, offset);
-
-    // Free allocated memory
-    free(uartTxBuffer);
-
-    return ret;
+    num = abs(num); // Si es negativo, tomamos su valor absoluto
+    while (num > 0) {
+        num /= 10;
+        count++;
+    }
+    return count;
 }
 
+void LSU_sendParameters(uint16_t destination,int32_t Lat,int32_t Lon,uint16_t T1,uint16_t T2,uint8_t bpm){
+	 memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
+	 uint8_t data_length=count_digits(Lat)+count_digits(Lon)+count_digits(T1)+count_digits(T2)+count_digits(bpm)+4;// +4 por los 4 guiones
+	 sprintf(uartTxBuffer, AT"SEND=%u,%u,%ld-%ld-%u-%u-%u"END, destination, data_length, Lat, Lon, T1, T2, bpm);
+	 rylr998_sendCommand(uartTxBuffer);
+	 HAL_Delay(500);    //el dato es largo, si mandamos un unico msj a la vez esto  no va, pero si mandamos uno atras del otro, salta el ERR-17 que significa q no se termino la Tx
+	 rylr998_getCommand(RYLR_OK,rx_buff,RX_BUFF);
+}
 
-
-#define TX_BUFFER_SIZE 64
-static char uartTxBuffer[TX_BUFFER_SIZE];
+void LSU_syncRequest(uint16_t destination){
+	 memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
+	 sprintf(uartTxBuffer, AT"SEND=%u,4,SYNC"END, destination);
+	 rylr998_sendCommand(uartTxBuffer);
+	 HAL_Delay(100);    //el dato es corto
+	 rylr998_getCommand(RYLR_OK,rx_buff,RX_BUFF);
+}
 
 void rylr998_sendCommand(const char *cmd) {
     HAL_UART_Transmit(&hlpuart1, (uint8_t *)cmd, strlen(cmd), 20);
 }
 
 void rylr998_getCommand(RYLR_RX_command_t cmd,uint8_t *rx_buff,uint8_t RX_BUFFER_SIZE){
-	HAL_Delay(30);
-		if(rylr998_GetInterruptFlag()){
+	HAL_Delay(30);  //Sin un retardo, la bandera no llega a ponerse en 1, Esta parte del codigo resulta delicada
+	while(!rylr998_GetInterruptFlag()){
+	}
+	if(rylr998_GetInterruptFlag()){
 				if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)!=cmd){
-				}
+			}
 		}else{
 			Error_Handler();
 		}
@@ -195,15 +195,15 @@ void rylr998_FACTORY(void){
 
 
 
-uint8_t rylr998_interrupt_flag;
+volatile uint8_t rylr998_interrupt_flag;
 
 
 /**
  * @brief  Sets IRQ flag whenever new data gets into gets recived in the Rx buffer
  *
  */
-void rylr998_SetInterruptFlag(void){
-	rylr998_interrupt_flag =1;
+void rylr998_SetInterruptFlag(uint8_t val){
+	rylr998_interrupt_flag =val;
 }
 
 
@@ -222,9 +222,6 @@ uint8_t rylr998_GetInterruptFlag(void){
  * @brief  Clear the IRQ flag
  *
  */
-void rylr998_ClearInterruptFlag(void){
-	rylr998_interrupt_flag =0;
-}
 
 
 
@@ -250,13 +247,13 @@ RYLR_RX_command_t rylr998_ResponseFind(char *rxBuffer)
 		{
 			return ret = RYLR_ERR;
 		}
+	else if(!memcmp(rxBuffer, "+FACTORY", 8))
+		{
+			return ret = RYLR_FACTORY;
+		}
 	/*else if(!memcmp(rxBuffer, "+READY"END, 5))
 	{
 		return ret = RYLR_RDY;
-	}
-	else if(!memcmp(rxBuffer, "+FACTORY", 8))
-	{
-		return ret = RYLR_FACTORY;
 	}
 	else if(!memcmp(rxBuffer, "+IPR=", 5))
 	{
@@ -291,12 +288,12 @@ RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
 			break;
 		}
 	}
-	rylr998_ClearInterruptFlag();
+
+	rylr998_SetInterruptFlag(0);
+
 	start_indx=(start_indx + i+1) % RX_BUFFER_SIZE;
 
             RYLR_RX_command_t cmd = rylr998_ResponseFind(aux_buff);
-
-            // Handle different cases
             switch (cmd)
             {
                 case RYLR_RCV:

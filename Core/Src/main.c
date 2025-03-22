@@ -88,7 +88,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+   HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -124,23 +124,14 @@ int main(void)
   while (1)
   {
 
-	  /* EXAMPLE TO SEND DATA
-	  uint8_t data_to_send[]= "Hi";
-	   	if(rylr998_sendData(&hlpuart1,0,(uint8_t*)&data_to_send,strlen((char*)data_to_send))==HAL_OK){ //Confirm that UART transfer was successful
-	   	while(1){
-			  if(rylr998_GetInterruptFlag()){           //Check if the IRQ is completed
-				  if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)==RYLR_OK){
-						//  LEDBlink(GPIOB, GPIO_PIN_3, 500);
-						//  LEDBlink(GPIOB, GPIO_PIN_3, 500);
-						//  LEDBlink(GPIOB, GPIO_PIN_3, 500);
-						  break;
-				  }
-			  }
-	   	}
-}else{
-*/
+    LSU_sendParameters(0,-214748364, 2147483647, 655, 65535, 10);
+	LSU_syncRequest(0);
+	HAL_Delay(100);
+
 }
 }
+
+
 
 /**
   * @brief System Clock Configuration

@@ -27,15 +27,15 @@
 typedef enum
 {
 	RYLR_OK = 0x00U,
-	RYLR_ADDRESS,
+	//RYLR_ADDRESS,
 	RYLR_RCV,
-	RYLR_RDY,
-	RYLR_IPR,
-	RYLR_UID,
-	RYLR_VER,
+	//RYLR_RDY,
+	//RYLR_IPR,
+	//RYLR_UID,
+	//RYLR_VER,
 	RYLR_FACTORY,
-	RYLR_RESET,
-	RYLR_READY,
+	//RYLR_RESET,
+	//RYLR_READY,
 	RYLR_ERR,
 	RYLR_NOT_FOUND
 
@@ -66,12 +66,10 @@ typedef struct{
 	uint8_t snr;
 }RYLR_RX_data_t;
 
-
-
 extern RYLR_RX_data_t rx_packet;
 
-
-
+//INIT
+void rylr998_setChannel(uint8_t ch,uint8_t address);
 void rylr998_config(RYLR_config_t *config_handler);
 
 //Tx
@@ -86,20 +84,23 @@ void rylr998_setCPIN(const char *password);
 void rylr998_setCRFOP(uint8_t CRFOP);
 void rylr998_FACTORY(void);
 
+
+void rylr998_getCommand(RYLR_RX_command_t cmd,uint8_t *rx_buff,uint8_t RX_BUFFER_SIZE);
+void rylr998_sendCommand(const char *cmd);
+
+void LSU_sendParameters(uint16_t destination,int32_t Lat,int32_t Lon,uint16_t T1,uint16_t T2,uint8_t bpm);
+void LSU_syncRequest(uint16_t destination);
+
 //Rx
 RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff,uint8_t RX_BUFFER_SIZE);
 RYLR_RX_command_t rylr998_ResponseFind(char *rxBuffer);
 
 
-void rylr998_getCommand(RYLR_RX_command_t cmd,uint8_t *rx_buff,uint8_t RX_BUFFER_SIZE);
-void rylr998_sendCommand(const char *cmd);
 
-void rylr998_SetInterruptFlag(void);
+//IRQ
+void rylr998_SetInterruptFlag(uint8_t val);
 uint8_t rylr998_GetInterruptFlag(void);
 void rylr998_ClearInterruptFlag(void);
-
-
-//
 
 
 #endif /* INC_RYLR998_H_ */
