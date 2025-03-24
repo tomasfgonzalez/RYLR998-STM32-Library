@@ -124,13 +124,22 @@ int main(void)
   while (1)
   {
 
-    LSU_sendParameters(0,-214748364, 2147483647, 655, 65535, 10);
-	LSU_syncRequest(0);
+  //------------------------------
+  // 		EXAMPLE SEND
+  //------------------------------
+    //LSU_sendParameters(0,-214748364, 2147483647, 655, 65535, 10);
+	//LSU_syncRequest(0);
+
+
 	HAL_Delay(100);
-
+  //------------------------------
+  // 		 EXAMPLE RECIVE
+  //------------------------------
+	if(rylr998_GetInterruptFlag()){
+					rylr998_prase_reciver(rx_buff,RX_BUFF);
+	}
 }
 }
-
 
 
 /**

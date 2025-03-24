@@ -10,6 +10,12 @@
 #include <string.h>
 #include <stdlib.h>
 
+
+//------------------------------
+// 		 LSU CHANNELS
+//------------------------------
+
+
 void rylr998_setChannel(uint8_t ch,uint8_t address){
 	RYLR_config_t config_handler;
 
@@ -47,11 +53,13 @@ void rylr998_setChannel(uint8_t ch,uint8_t address){
 	rylr998_config(&config_handler);
 }
 
-
+//------------------------------
+// 		 CONFIG ALL SETTINGS
+//------------------------------
 
 void rylr998_config(RYLR_config_t *config_handler){
-		rylr998_FACTORY();
-		rylr998_getCommand(RYLR_FACTORY,rx_buff,RX_BUFF);
+		//rylr998_FACTORY();
+		//rylr998_getCommand(RYLR_FACTORY,rx_buff,RX_BUFF);
 		//NETWORKID
 		rylr998_networkId(config_handler->networkId);
 		rylr998_getCommand(RYLR_OK,rx_buff,RX_BUFF);
@@ -80,8 +88,16 @@ void rylr998_config(RYLR_config_t *config_handler){
 
 
 
+
+
+
+//------------------------------
+// 				LSU
+//------------------------------
+
 #define TX_BUFFER_SIZE 128 //118
 static char uartTxBuffer[TX_BUFFER_SIZE];
+
 
 int count_digits(int32_t num) {
     if (num == 0) return 1; // El número 0 tiene un solo dígito
@@ -114,6 +130,13 @@ void LSU_syncRequest(uint16_t destination){
 	 rylr998_getCommand(RYLR_OK,rx_buff,RX_BUFF);
 }
 
+
+
+
+
+//-----------------------------------------------
+// 			SEND AND GET DATA FROM LPUART1
+//------------------------------------------------
 void rylr998_sendCommand(const char *cmd) {
     HAL_UART_Transmit(&hlpuart1, (uint8_t *)cmd, strlen(cmd), 20);
 }
@@ -124,12 +147,18 @@ void rylr998_getCommand(RYLR_RX_command_t cmd,uint8_t *rx_buff,uint8_t RX_BUFFER
 	}
 	if(rylr998_GetInterruptFlag()){
 				if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)!=cmd){
+			}else{
+				//wrong command
 			}
-		}else{
-			Error_Handler();
 		}
 }
 
+
+
+
+//------------------------------
+// 		Config Commands
+//------------------------------
 void rylr998_setAddress(uint8_t address) {
 	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
     snprintf(uartTxBuffer, sizeof(uartTxBuffer), AT "ADDRESS=%d" END, address);
@@ -187,166 +216,156 @@ void rylr998_setCRFOP(uint8_t CRFOP){
 	rylr998_sendCommand(uartTxBuffer);
 }
 
-void rylr998_FACTORY(void){
+/*void rylr998_FACTORY(void){
 	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
 	snprintf(uartTxBuffer, TX_BUFFER_SIZE,  AT"FACTORY"END);
 	rylr998_sendCommand(uartTxBuffer);
-}
+}*/
 
+
+
+
+
+
+//----------------------------------
+// 		 IRQ FLAG -> LOOK UART FILE
+//----------------------------------
 
 
 volatile uint8_t rylr998_interrupt_flag;
 
 
-/**
- * @brief  Sets IRQ flag whenever new data gets into gets recived in the Rx buffer
- *
- */
+
 void rylr998_SetInterruptFlag(uint8_t val){
 	rylr998_interrupt_flag =val;
 }
 
 
-
-/**
- * @brief  Returns the value of the flag
- * @retval flag status
- *
- */
 uint8_t rylr998_GetInterruptFlag(void){
 	return rylr998_interrupt_flag;
 }
 
 
-/**
- * @brief  Clear the IRQ flag
- *
- */
 
 
 
-/**
- * @brief handles the response of the uart msg
- * @params RxBuffer sorted
- * @retval command selected
- *
- */
-RYLR_RX_command_t rylr998_ResponseFind(char *rxBuffer)
-{
+//------------------------------
+// 		 RX PROCESS
+//------------------------------
 
-	RYLR_RX_command_t 	ret 					= RYLR_NOT_FOUND;
-	if(!memcmp(rxBuffer, "+OK"END, 5))
-	{
-		return ret = RYLR_OK;
-	}
-	else if(!memcmp(rxBuffer, "+RCV", 4))
-		{
-			return ret = RYLR_RCV;
-		}
-	else if(!memcmp(rxBuffer, "+ERR=", 5))
-		{
-			return ret = RYLR_ERR;
-		}
-	else if(!memcmp(rxBuffer, "+FACTORY", 8))
-		{
-			return ret = RYLR_FACTORY;
-		}
-	/*else if(!memcmp(rxBuffer, "+READY"END, 5))
-	{
-		return ret = RYLR_RDY;
-	}
-	else if(!memcmp(rxBuffer, "+IPR=", 5))
-	{
-		return ret = RYLR_IPR;
-	}*/
-	return ret;
-}
-
+const RYLR_CommandEntry commandTable[] = {
+    {"+OK", RYLR_OK},
+    {"+RCV", RYLR_RCV},
+    {"+ERR", RYLR_ERR},
+	{"ACK", RYLR_RCV_ACK},
+    //{"+FACTORY", RYLR_FACTORY},
+    {NULL, RYLR_NOT_FOUND} // Sentinel value
+};
 
 RYLR_RX_data_t rx_packet;
 
-RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE)
-{
-
-	static char aux_buff[64];  //it must match with RX_BUFFER_SIZE
-	static uint8_t start_indx=0;
-	static uint8_t i;
-
-	for(i = 0; i <RX_BUFFER_SIZE; i++){   //Looks for the index of the starting char
-
-		if(pBuff[(start_indx+i) % RX_BUFFER_SIZE]=='+'){
-			start_indx=(start_indx + i) % RX_BUFFER_SIZE;
-			break;
-		}
-	}
-
-	for (i = 0; i <RX_BUFFER_SIZE; i++){
-
-		aux_buff[i] = pBuff[(start_indx + i) % RX_BUFFER_SIZE];
-
-		if(aux_buff[i]=='\n'){
-			break;
-		}
-	}
-
-	rylr998_SetInterruptFlag(0);
-
-	start_indx=(start_indx + i+1) % RX_BUFFER_SIZE;
-
-            RYLR_RX_command_t cmd = rylr998_ResponseFind(aux_buff);
-            switch (cmd)
-            {
-                case RYLR_RCV:
-                    // Handle RCV response
-                	/*Example: Module received the ID Address 50 send 5 bytes data,
-                	 * Content is HELLO string, RSSI is -99dBm, SNR is 40, It will show as below.
-                	 *  +RCV=50,5,HELLO,-99,40\r\n
-                	 */
-            	    char *token;
-            	    // Parse ID address
-            	    token = strtok(aux_buff, "=");  // Remove "+RCV="
-            	    token = strtok(NULL, ",");      // Get ID address
-            	    rx_packet.id = atoi(token);
-
-            	    // Parse byte count
-            	    token = strtok(NULL, ",");      // Get byte count
-            	    rx_packet.byte_count = atoi(token);
-
-            	    // Parse actual data
-            	    token = strtok(NULL, ",");
-            	    strncpy(rx_packet.data, token, rx_packet.byte_count);  // Copy up to byte_count
-            	    rx_packet.data[rx_packet.byte_count] = '\0';  // Ensure null termination
-
-            	    // Parse RSSI
-            	    token = strtok(NULL, ",");      // Get RSSI
-            	    rx_packet.rssi = atoi(token);
-
-            	    // Parse SNR
-            	    token = strtok(NULL, ",");      // Get SNR
-            	    rx_packet.snr = atoi(token);
-
-                    break;
-                case RYLR_OK:
-                    // Handle OK response
-                    break;
-                case RYLR_ERR:
-
-                	while(1){  //TODO  for now, if something went wrong, the code gets stuck here.
-                		Error_Handler();
-                	}
-                	break;
-                /*
-                case RYLR_RDY:
-                    // Handle READY response
-                    break;
-                case RYLR_ADDRESS:
-                                                   // Handle ADDRESS response
-                    break;*/
-                default:
-                    break;
-            }
-
-
-            return cmd;
+RYLR_RX_command_t rylr998_ResponseFind(const char *rxBuffer) {
+    for (int i = 0; commandTable[i].prefix != NULL; i++) {
+        if (strncmp(rxBuffer, commandTable[i].prefix, strlen(commandTable[i].prefix)) == 0) {
+            return commandTable[i].command;
+        }
+    }
+    return RYLR_NOT_FOUND;
 }
+
+
+RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE) {
+    static char aux_buff[64];  // Should match with RX_BUFFER_SIZE
+    static uint8_t start_indx = 0;
+    uint8_t i = 0;
+
+    // Find the '+' start character
+    while (i < RX_BUFFER_SIZE && pBuff[(start_indx + i) % RX_BUFFER_SIZE] != '+') {
+        i++;
+    }
+    start_indx = (start_indx + i) % RX_BUFFER_SIZE;
+
+    // Copy the command into aux_buff
+    for (i = 0; i < RX_BUFFER_SIZE; i++) {
+        aux_buff[i] = pBuff[(start_indx + i) % RX_BUFFER_SIZE];
+        if (aux_buff[i] == '\n') break;
+    }
+    aux_buff[i + 1] = '\0'; // Ensure null termination
+
+    rylr998_SetInterruptFlag(0);
+    start_indx = (start_indx + i + 1) % RX_BUFFER_SIZE;
+
+    RYLR_RX_command_t cmd = rylr998_ResponseFind(aux_buff);
+    if (cmd == RYLR_RCV) {
+    	char *ptr = aux_buff;
+    	rx_packet.data[0] = '\0'; // Initialize data as empty string
+
+    	// Skip past "+RCV="
+    	while (*ptr && *ptr != '=') ptr++;
+    	if (*ptr) ptr++; // Skip '='
+
+    	// Parse ID (first number after '=')
+    	rx_packet.id = 0;
+    	while (*ptr >= '0' && *ptr <= '9') {
+    	    rx_packet.id = rx_packet.id * 10 + (*ptr - '0');
+    	    ptr++;
+    	}
+    	if (*ptr != ',') return cmd = RYLR_RCV_ERR; // Invalid format
+    	ptr++; // Skip ','
+
+    	// Parse byte count
+    	rx_packet.byte_count = 0;
+    	while (*ptr >= '0' && *ptr <= '9') {
+    	    rx_packet.byte_count = rx_packet.byte_count * 10 + (*ptr - '0');
+    	    ptr++;
+    	}
+    	if (*ptr != ',') return cmd = RYLR_RCV_ERR; // Invalid format
+    	ptr++; // Skip ','
+
+    	// Parse data (copy up to byte_count or buffer size)
+    	size_t i = 0;
+    	size_t max_copy = (rx_packet.byte_count < sizeof(rx_packet.data)) ?
+    	                 rx_packet.byte_count : sizeof(rx_packet.data) - 1;
+    	while (i < max_copy && *ptr && *ptr != ',') {
+    	    rx_packet.data[i++] = *ptr++;
+    	}
+    	rx_packet.data[i] = '\0';
+
+    	// Skip remaining data if needed
+    	while (*ptr && *ptr != ',') ptr++;
+    	if (*ptr != ',') return cmd = RYLR_RCV_ERR; // Invalid format
+    	ptr++; // Skip ','
+    	ptr++; // Skip '-'
+    	// Parse RSSI
+    	rx_packet.rssi = 0;
+    	while (*ptr >= '0' && *ptr <= '9') {
+    		rx_packet.rssi = rx_packet.rssi * 10 + (*ptr - '0');
+    	    ptr++;
+    	}
+
+    	if (*ptr != ',') return cmd = RYLR_RCV_ERR; // Invalid format
+    	ptr++; // Skip ','
+
+    	// Parse SNR
+    	rx_packet.snr = 0;
+    	while (*ptr >= '0' && *ptr <= '9') {
+    	    rx_packet.snr = rx_packet.snr * 10 + (*ptr - '0');
+    	    ptr++;
+    	}
+
+    	//------------------------------
+    	// 		 PROCESS RECIVED DATA:
+    	//------------------------------
+
+    	if(rylr998_ResponseFind(rx_packet.data)==RYLR_RCV_ACK){
+    		cmd = RYLR_RCV_ACK;
+    	}
+
+
+    } else if (cmd == RYLR_ERR) {
+        while (1) { Error_Handler(); } // Handle error
+    }
+    return cmd;
+}
+
 

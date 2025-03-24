@@ -29,11 +29,13 @@ typedef enum
 	RYLR_OK = 0x00U,
 	//RYLR_ADDRESS,
 	RYLR_RCV,
+	RYLR_RCV_ERR,
+	RYLR_RCV_ACK,
 	//RYLR_RDY,
 	//RYLR_IPR,
 	//RYLR_UID,
 	//RYLR_VER,
-	RYLR_FACTORY,
+	//RYLR_FACTORY,
 	//RYLR_RESET,
 	//RYLR_READY,
 	RYLR_ERR,
@@ -62,9 +64,14 @@ typedef struct{
 	uint16_t id;
 	uint8_t byte_count;
 	char data[64];    //LoRa suports up to 240 data char
-	int8_t rssi;
+	uint8_t rssi;      //Always negative
 	uint8_t snr;
 }RYLR_RX_data_t;
+
+typedef struct {
+    const char *prefix;
+    RYLR_RX_command_t command;
+} RYLR_CommandEntry;
 
 extern RYLR_RX_data_t rx_packet;
 
@@ -82,7 +89,7 @@ void rylr998_mode(uint8_t mode, uint32_t rxTime, uint32_t LowSpeedTime);
 void rylr998_setBand(uint32_t frequency,uint8_t memory);
 void rylr998_setCPIN(const char *password);
 void rylr998_setCRFOP(uint8_t CRFOP);
-void rylr998_FACTORY(void);
+//void rylr998_FACTORY(void);
 
 
 void rylr998_getCommand(RYLR_RX_command_t cmd,uint8_t *rx_buff,uint8_t RX_BUFFER_SIZE);
@@ -93,14 +100,12 @@ void LSU_syncRequest(uint16_t destination);
 
 //Rx
 RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff,uint8_t RX_BUFFER_SIZE);
-RYLR_RX_command_t rylr998_ResponseFind(char *rxBuffer);
-
+RYLR_RX_command_t rylr998_ResponseFind(const char *rxBuffer);
 
 
 //IRQ
 void rylr998_SetInterruptFlag(uint8_t val);
 uint8_t rylr998_GetInterruptFlag(void);
-void rylr998_ClearInterruptFlag(void);
 
 
 #endif /* INC_RYLR998_H_ */
