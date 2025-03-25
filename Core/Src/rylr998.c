@@ -11,14 +11,37 @@
 #include <stdlib.h>
 
 
+#define TX_BUFFER_SIZE 128 //118
+static char uartTxBuffer[TX_BUFFER_SIZE];
+
+
+//----------------------------------
+// 		 IRQ FLAG -> LOOK UART FILE
+//----------------------------------
+
+
+volatile uint8_t rylr998_interrupt_flag;
+
+
+
+void rylr998_SetInterruptFlag(uint8_t val){
+	rylr998_interrupt_flag =val;
+}
+
+
+uint8_t rylr998_GetInterruptFlag(void){
+	return rylr998_interrupt_flag;
+}
+
+
+
+
 //------------------------------
 // 		 LSU CHANNELS
 //------------------------------
-
+RYLR_config_t config_handler;
 
 void rylr998_setChannel(uint8_t ch,uint8_t address){
-	RYLR_config_t config_handler;
-
 	if(ch){                             //MAIN CHANNEL
 	config_handler.networkId =18;
 	config_handler.address =address;
@@ -47,17 +70,85 @@ void rylr998_setChannel(uint8_t ch,uint8_t address){
 	//config_handler.baudRate=115200;
 	config_handler.frequency=915000000;
 	config_handler.memory=1;
-	//strcpy(config_handler.password, "FFFFFFFF"); //we dont want the \0 terminator so we overflow
+	//strcpy(config_handler.password, "FFFFFFFF"); //we dont want the \0 terminator so we overflow, esta comentado para no tener que config password en ambos dispositivos
 	config_handler.CRFOP=22;
 	}
 	rylr998_config(&config_handler);
 }
 
+
+
+//------------------------------
+// 		Config Commands
+//------------------------------
+static void rylr998_setAddress(const uint8_t address) {
+	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
+    snprintf(uartTxBuffer, sizeof(uartTxBuffer), AT "ADDRESS=%d" END, address);
+    rylr998_sendCommand(uartTxBuffer);
+}
+
+static void rylr998_networkId(const uint8_t networkId){
+	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
+	snprintf(uartTxBuffer, TX_BUFFER_SIZE, AT "NETWORKID=%u" END, networkId);
+	rylr998_sendCommand(uartTxBuffer);
+}
+
+static void rylr998_setParameter(const uint8_t SF,const uint8_t BW,const uint8_t CR,const uint8_t ProgramedPreamble){
+	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
+	snprintf(uartTxBuffer, TX_BUFFER_SIZE, AT "PARAMETER=%u,%u,%u,%u" END, SF, BW, CR, ProgramedPreamble);
+	rylr998_sendCommand(uartTxBuffer);
+}
+/*
+void rylr998_reset(void){
+	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
+	snprintf(uartTxBuffer, TX_BUFFER_SIZE, AT "RESET" END);
+	rylr998_sendCommand(uartTxBuffer);
+}*/
+
+static void rylr998_mode(const uint8_t mode,const uint32_t rxTime,const uint32_t LowSpeedTime){
+	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
+	if (rxTime==0||LowSpeedTime==0){snprintf(uartTxBuffer, TX_BUFFER_SIZE, AT"MODE=%u" END, mode);
+	}else{snprintf(uartTxBuffer, TX_BUFFER_SIZE, AT"MODE=2,%lu,%lu" END,rxTime,LowSpeedTime);}
+	rylr998_sendCommand(uartTxBuffer);
+}
+
+/*
+void rylr998_setBaudRate(uint32_t baudRate){
+	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
+	snprintf(uartTxBuffer, TX_BUFFER_SIZE,  AT "IPR=%lu" END, baudRate);
+	rylr998_sendCommand(uartTxBuffer);
+}*/
+
+static void rylr998_setBand(const uint32_t frequency,const uint8_t memory){
+	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
+	if(memory){snprintf(uartTxBuffer, TX_BUFFER_SIZE, AT"BAND=%lu,M"END,frequency);
+	}else{snprintf(uartTxBuffer, TX_BUFFER_SIZE, AT"BAND=%lu,M"END,frequency);}
+	rylr998_sendCommand(uartTxBuffer);
+}
+
+static void rylr998_setCPIN(const char *password){
+	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
+	snprintf(uartTxBuffer, TX_BUFFER_SIZE,  AT "CPIN=%s"END, password);
+	rylr998_sendCommand(uartTxBuffer);
+}
+
+static void rylr998_setCRFOP(const uint8_t CRFOP){
+	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
+	snprintf(uartTxBuffer, TX_BUFFER_SIZE,  AT"CRFOP=%u"END, CRFOP);
+	rylr998_sendCommand(uartTxBuffer);
+}
+
+/*void rylr998_FACTORY(void){
+	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
+	snprintf(uartTxBuffer, TX_BUFFER_SIZE,  AT"FACTORY"END);
+	rylr998_sendCommand(uartTxBuffer);
+}*/
+
 //------------------------------
 // 		 CONFIG ALL SETTINGS
 //------------------------------
 
-void rylr998_config(RYLR_config_t *config_handler){
+void rylr998_config(const RYLR_config_t *config_handler){
 		//rylr998_FACTORY();
 		//rylr998_getCommand(RYLR_FACTORY,rx_buff,RX_BUFF);
 		//NETWORKID
@@ -87,17 +178,9 @@ void rylr998_config(RYLR_config_t *config_handler){
 }
 
 
-
-
-
-
 //------------------------------
 // 				LSU
 //------------------------------
-
-#define TX_BUFFER_SIZE 128 //118
-static char uartTxBuffer[TX_BUFFER_SIZE];
-
 
 int count_digits(int32_t num) {
     if (num == 0) return 1; // El número 0 tiene un solo dígito
@@ -122,7 +205,7 @@ void LSU_sendParameters(uint16_t destination,int32_t Lat,int32_t Lon,uint16_t T1
 	 rylr998_getCommand(RYLR_OK,rx_buff,RX_BUFF);
 }
 
-void LSU_syncRequest(uint16_t destination){
+void LSU_sendSyncRequest(uint16_t destination){
 	 memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
 	 sprintf(uartTxBuffer, AT"SEND=%u,4,SYNC"END, destination);
 	 rylr998_sendCommand(uartTxBuffer);
@@ -143,7 +226,7 @@ void rylr998_sendCommand(const char *cmd) {
 
 void rylr998_getCommand(RYLR_RX_command_t cmd,uint8_t *rx_buff,uint8_t RX_BUFFER_SIZE){
 	HAL_Delay(30);  //Sin un retardo, la bandera no llega a ponerse en 1, Esta parte del codigo resulta delicada
-	while(!rylr998_GetInterruptFlag()){
+	while(!rylr998_interrupt_flag){
 	}
 	if(rylr998_GetInterruptFlag()){
 				if(rylr998_prase_reciver(rx_buff,RX_BUFFER_SIZE)!=cmd){
@@ -152,100 +235,6 @@ void rylr998_getCommand(RYLR_RX_command_t cmd,uint8_t *rx_buff,uint8_t RX_BUFFER
 			}
 		}
 }
-
-
-
-
-//------------------------------
-// 		Config Commands
-//------------------------------
-void rylr998_setAddress(uint8_t address) {
-	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
-    snprintf(uartTxBuffer, sizeof(uartTxBuffer), AT "ADDRESS=%d" END, address);
-    rylr998_sendCommand(uartTxBuffer);
-}
-
-void rylr998_networkId(uint8_t networkId){
-	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
-	snprintf(uartTxBuffer, TX_BUFFER_SIZE, AT "NETWORKID=%u" END, networkId);
-	rylr998_sendCommand(uartTxBuffer);
-}
-
-void rylr998_setParameter(uint8_t SF, uint8_t BW, uint8_t CR, uint8_t ProgramedPreamble){
-	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
-	snprintf(uartTxBuffer, TX_BUFFER_SIZE, AT "PARAMETER=%u,%u,%u,%u" END, SF, BW, CR, ProgramedPreamble);
-	rylr998_sendCommand(uartTxBuffer);
-}
-/*
-void rylr998_reset(void){
-	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
-	snprintf(uartTxBuffer, TX_BUFFER_SIZE, AT "RESET" END);
-	rylr998_sendCommand(uartTxBuffer);
-}*/
-
-void rylr998_mode(uint8_t mode, uint32_t rxTime, uint32_t LowSpeedTime){
-	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
-	if (rxTime==0||LowSpeedTime==0){snprintf(uartTxBuffer, TX_BUFFER_SIZE, AT"MODE=%u" END, mode);
-	}else{snprintf(uartTxBuffer, TX_BUFFER_SIZE, AT"MODE=2,%lu,%lu" END,rxTime,LowSpeedTime);}
-	rylr998_sendCommand(uartTxBuffer);
-}
-
-/*
-void rylr998_setBaudRate(uint32_t baudRate){
-	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
-	snprintf(uartTxBuffer, TX_BUFFER_SIZE,  AT "IPR=%lu" END, baudRate);
-	rylr998_sendCommand(uartTxBuffer);
-}*/
-
-void rylr998_setBand(uint32_t frequency,uint8_t memory){
-	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
-	if(memory){snprintf(uartTxBuffer, TX_BUFFER_SIZE, AT"BAND=%lu,M"END,frequency);
-	}else{snprintf(uartTxBuffer, TX_BUFFER_SIZE, AT"BAND=%lu,M"END,frequency);}
-	rylr998_sendCommand(uartTxBuffer);
-}
-
-void rylr998_setCPIN(const char *password){
-	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
-	snprintf(uartTxBuffer, TX_BUFFER_SIZE,  AT "CPIN=%s"END, password);
-	rylr998_sendCommand(uartTxBuffer);
-}
-
-void rylr998_setCRFOP(uint8_t CRFOP){
-	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
-	snprintf(uartTxBuffer, TX_BUFFER_SIZE,  AT"CRFOP=%u"END, CRFOP);
-	rylr998_sendCommand(uartTxBuffer);
-}
-
-/*void rylr998_FACTORY(void){
-	memset(uartTxBuffer, 0, sizeof(TX_BUFFER_SIZE));
-	snprintf(uartTxBuffer, TX_BUFFER_SIZE,  AT"FACTORY"END);
-	rylr998_sendCommand(uartTxBuffer);
-}*/
-
-
-
-
-
-
-//----------------------------------
-// 		 IRQ FLAG -> LOOK UART FILE
-//----------------------------------
-
-
-volatile uint8_t rylr998_interrupt_flag;
-
-
-
-void rylr998_SetInterruptFlag(uint8_t val){
-	rylr998_interrupt_flag =val;
-}
-
-
-uint8_t rylr998_GetInterruptFlag(void){
-	return rylr998_interrupt_flag;
-}
-
-
 
 
 
@@ -295,10 +284,12 @@ RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE) 
     rylr998_SetInterruptFlag(0);
     start_indx = (start_indx + i + 1) % RX_BUFFER_SIZE;
 
-    RYLR_RX_command_t cmd = rylr998_ResponseFind(aux_buff);
-    if (cmd == RYLR_RCV) {
+    volatile  RYLR_RX_command_t cmd = rylr998_ResponseFind(aux_buff);   //se define como volatil para que no sea optimizada
+    if(cmd==RYLR_OK){
+
+    } else if (cmd == RYLR_RCV) {
     	char *ptr = aux_buff;
-    	rx_packet.data[0] = '\0'; // Initialize data as empty string
+    	memset(rx_packet.data, 0, sizeof(rx_packet.data));  // Initialize data as empty string
 
     	// Skip past "+RCV="
     	while (*ptr && *ptr != '=') ptr++;
@@ -360,7 +351,6 @@ RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE) 
     	if(rylr998_ResponseFind(rx_packet.data)==RYLR_RCV_ACK){
     		cmd = RYLR_RCV_ACK;
     	}
-
 
     } else if (cmd == RYLR_ERR) {
         while (1) { Error_Handler(); } // Handle error

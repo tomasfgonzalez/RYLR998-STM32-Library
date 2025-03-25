@@ -116,8 +116,7 @@ int main(void)
 
 
 	//Configuration parameters
-
-	rylr998_setChannel(1,0);
+	rylr998_setChannel(1,3);
 
 
 
@@ -128,7 +127,7 @@ int main(void)
   // 		EXAMPLE SEND
   //------------------------------
     //LSU_sendParameters(0,-214748364, 2147483647, 655, 65535, 10);
-	//LSU_syncRequest(0);
+    //LSU_sendSyncRequest(0);
 
 
 	HAL_Delay(100);
@@ -136,7 +135,13 @@ int main(void)
   // 		 EXAMPLE RECIVE
   //------------------------------
 	if(rylr998_GetInterruptFlag()){
-					rylr998_prase_reciver(rx_buff,RX_BUFF);
+					if(rylr998_prase_reciver(rx_buff,RX_BUFF)==RYLR_RCV_ACK){
+						LEDBlink(GPIOB,GPIO_PIN_3,200);
+						LEDBlink(GPIOB,GPIO_PIN_3,200);
+						LEDBlink(GPIOB,GPIO_PIN_3,200);
+						LEDBlink(GPIOB,GPIO_PIN_3,200);
+						LEDBlink(GPIOB,GPIO_PIN_3,200);
+					}
 	}
 }
 }

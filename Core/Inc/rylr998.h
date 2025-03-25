@@ -13,14 +13,6 @@
 
 #define END "\r\n"
 #define AT "AT+"
-/*
- * +RCV=<Address>,<Length>,<Data>,<RSSI>,<SNR>,
-	<Address> Transmitter Address ID
-	<Length> Data Length
-	<Data> ASCll Data
-	<RSSI> Received Signal Strength
-	<SNR> Signal-to-noise ratio
- */
 
 
 
@@ -60,10 +52,21 @@ typedef struct{
 	uint8_t CRFOP; 					//22: 22dBm(default) 21: 21dBm 20: 20dBm ... 01: 1dBm 00: 0dBm
 }RYLR_config_t;
 
+
+
+/*
+ * +RCV=<Address>,<Length>,<Data>,<RSSI>,<SNR>,
+	<Address> Transmitter Address ID
+	<Length> Data Length
+	<Data> ASCII Data
+	<RSSI> Received Signal Strength
+	<SNR> Signal-to-noise ratio
+ */
+
 typedef struct{
 	uint16_t id;
 	uint8_t byte_count;
-	char data[64];    //LoRa suports up to 240 data char
+	char data[64];    //LoRa suports up to 240 data char, this must less or equal RxBuff var in UART file
 	uint8_t rssi;      //Always negative
 	uint8_t snr;
 }RYLR_RX_data_t;
@@ -73,30 +76,20 @@ typedef struct {
     RYLR_RX_command_t command;
 } RYLR_CommandEntry;
 
+
 extern RYLR_RX_data_t rx_packet;
 
-//INIT
+//Tx CFG
 void rylr998_setChannel(uint8_t ch,uint8_t address);
-void rylr998_config(RYLR_config_t *config_handler);
-
-//Tx
-void rylr998_setAddress(uint8_t address);
-void rylr998_networkId(uint8_t networkId);
-void rylr998_setParameter(uint8_t SF, uint8_t BW, uint8_t CR, uint8_t ProgramedPreamble);
-//void rylr998_reset(void);
-void rylr998_mode(uint8_t mode, uint32_t rxTime, uint32_t LowSpeedTime);
-//void rylr998_setBaudRate(uint32_t baudRate);
-void rylr998_setBand(uint32_t frequency,uint8_t memory);
-void rylr998_setCPIN(const char *password);
-void rylr998_setCRFOP(uint8_t CRFOP);
-//void rylr998_FACTORY(void);
+void rylr998_config(const RYLR_config_t *config_handler);
 
 
 void rylr998_getCommand(RYLR_RX_command_t cmd,uint8_t *rx_buff,uint8_t RX_BUFFER_SIZE);
 void rylr998_sendCommand(const char *cmd);
 
+//Tx LSU
 void LSU_sendParameters(uint16_t destination,int32_t Lat,int32_t Lon,uint16_t T1,uint16_t T2,uint8_t bpm);
-void LSU_syncRequest(uint16_t destination);
+void LSU_sendSyncRequest(uint16_t destination);
 
 //Rx
 RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff,uint8_t RX_BUFFER_SIZE);
