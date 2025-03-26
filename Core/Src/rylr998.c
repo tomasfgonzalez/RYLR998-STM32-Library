@@ -39,9 +39,9 @@ uint8_t rylr998_GetInterruptFlag(void){
 //------------------------------
 // 		 LSU CHANNELS
 //------------------------------
-RYLR_config_t config_handler;
 
 void rylr998_setChannel(uint8_t ch,uint8_t address){
+	RYLR_config_t config_handler;
 	if(ch){                             //MAIN CHANNEL
 	config_handler.networkId =18;
 	config_handler.address =address;
@@ -351,6 +351,9 @@ RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE) 
     	if(rylr998_ResponseFind(rx_packet.data)==RYLR_RCV_ACK){
     		cmd = RYLR_RCV_ACK;
     	}
+
+    	//TODO proccess recived SYNC DATA
+
 
     } else if (cmd == RYLR_ERR) {
         while (1) { Error_Handler(); } // Handle error

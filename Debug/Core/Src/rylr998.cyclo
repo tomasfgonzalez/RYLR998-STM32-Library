@@ -6,6 +6,6 @@
 ../Core/Src/rylr998.c:266:19:rylr998_prase_reciver	28
 ../Core/Src/rylr998.c:227:6:rylr998_getCommand	3
 ../Core/Src/rylr998.c:151:6:rylr998_config	3
-../Core/Src/rylr998.c:44:6:rylr998_setChannel	1
+../Core/Src/rylr998.c:43:6:rylr998_setChannel	1
 ../Core/Src/rylr998.c:199:6:LSU_sendParameters	1
 ../Core/Src/rylr998.c:208:6:LSU_sendSyncRequest	1

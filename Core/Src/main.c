@@ -116,7 +116,7 @@ int main(void)
 
 
 	//Configuration parameters
-	rylr998_setChannel(1,3);
+	//rylr998_setChannel(1,3);
 
 
 
@@ -126,8 +126,8 @@ int main(void)
   //------------------------------
   // 		EXAMPLE SEND
   //------------------------------
-    //LSU_sendParameters(0,-214748364, 2147483647, 655, 65535, 10);
-    //LSU_sendSyncRequest(0);
+    LSU_sendParameters(0,-214748364, 2147483647, 655, 65535, 10);
+    LSU_sendSyncRequest(0);
 
 
 	HAL_Delay(100);
