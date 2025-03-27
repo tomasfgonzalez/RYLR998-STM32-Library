@@ -1,11 +1,12 @@
 ../Core/Src/rylr998.c:27:6:rylr998_SetInterruptFlag	1
 ../Core/Src/rylr998.c:32:9:rylr998_GetInterruptFlag	1
 ../Core/Src/rylr998.c:185:5:count_digits	3
-../Core/Src/rylr998.c:223:6:rylr998_sendCommand	1
+../Core/Src/rylr998.c:220:6:rylr998_sendCommand	1
 ../Core/Src/rylr998.c:256:19:rylr998_ResponseFind	3
-../Core/Src/rylr998.c:266:19:rylr998_prase_reciver	28
-../Core/Src/rylr998.c:227:6:rylr998_getCommand	3
+../Core/Src/rylr998.c:268:10:ascii_hex_to_uint32	3
+../Core/Src/rylr998.c:282:19:rylr998_prase_reciver	29
+../Core/Src/rylr998.c:224:6:rylr998_getCommand	3
 ../Core/Src/rylr998.c:151:6:rylr998_config	3
-../Core/Src/rylr998.c:43:6:rylr998_setChannel	1
+../Core/Src/rylr998.c:43:6:rylr998_setChannel	2
 ../Core/Src/rylr998.c:199:6:LSU_sendParameters	1
 ../Core/Src/rylr998.c:208:6:LSU_sendSyncRequest	1

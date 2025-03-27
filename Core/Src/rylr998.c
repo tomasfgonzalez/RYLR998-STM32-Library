@@ -45,10 +45,10 @@ void rylr998_setChannel(uint8_t ch,uint8_t address){
 	if(ch){                             //MAIN CHANNEL
 	config_handler.networkId =18;
 	config_handler.address =address;
-	config_handler.SF=9;
-	config_handler.BW=7;
-	config_handler.CR=1;
-	config_handler.ProgramedPreamble=12;
+	config_handler.SF=9;						//Spreding Factor 9  (maximum for 125kHz)
+	config_handler.BW=7;						//125kHz
+	config_handler.CR=1;						//4/5 Coding rate
+	config_handler.ProgramedPreamble=12;		//default
 	config_handler.mode=0;
 	config_handler.rxTime=0;
 	config_handler.LowSpeedTime=0;
@@ -56,14 +56,14 @@ void rylr998_setChannel(uint8_t ch,uint8_t address){
 	config_handler.frequency=915000000;
 	config_handler.memory=1;
 	//strcpy(config_handler.password, "FFFFFFFF"); //we dont want the \0 terminator so we overflow, estan comentados para ver los msj
-	config_handler.CRFOP=22;
+	config_handler.CRFOP=22;					//MAX TRANSMIT POWER CONSUMPTION 144.7mA
 	}else{     							//AUX CHANNEL
 	config_handler.networkId =18;
 	config_handler.address =address;
-	config_handler.SF=9;
-	config_handler.BW=7;
-	config_handler.CR=1;
-	config_handler.ProgramedPreamble=12;
+	config_handler.SF=5;						//SF
+	config_handler.BW=9;  						//500kHz
+	config_handler.CR=1;						//4/5 Coding rate
+	config_handler.ProgramedPreamble=4;			//default
 	config_handler.mode=0;
 	config_handler.rxTime=0;
 	config_handler.LowSpeedTime=0;
@@ -71,7 +71,7 @@ void rylr998_setChannel(uint8_t ch,uint8_t address){
 	config_handler.frequency=915000000;
 	config_handler.memory=1;
 	//strcpy(config_handler.password, "FFFFFFFF"); //we dont want the \0 terminator so we overflow, esta comentado para no tener que config password en ambos dispositivos
-	config_handler.CRFOP=22;
+	config_handler.CRFOP=10;                     //TRANSMIT POWER CONSUMPTION  94.4 mA
 	}
 	rylr998_config(&config_handler);
 }
@@ -214,9 +214,6 @@ void LSU_sendSyncRequest(uint16_t destination){
 }
 
 
-
-
-
 //-----------------------------------------------
 // 			SEND AND GET DATA FROM LPUART1
 //------------------------------------------------
@@ -247,9 +244,12 @@ const RYLR_CommandEntry commandTable[] = {
     {"+RCV", RYLR_RCV},
     {"+ERR", RYLR_ERR},
 	{"ACK", RYLR_RCV_ACK},
+	{"TIM-",RYLR_RCV_TIME},
     //{"+FACTORY", RYLR_FACTORY},
     {NULL, RYLR_NOT_FOUND} // Sentinel value
 };
+
+uint32_t iTOW_sync;
 
 RYLR_RX_data_t rx_packet;
 
@@ -261,6 +261,22 @@ RYLR_RX_command_t rylr998_ResponseFind(const char *rxBuffer) {
     }
     return RYLR_NOT_FOUND;
 }
+
+
+
+
+uint32_t ascii_hex_to_uint32(const char *data) {
+    uint32_t result = 0;
+
+    for (int i = 0; i < 8; i++) {
+        char c = data[i];
+        uint8_t value = (c >= '0' && c <= '9') ? (c - '0') : (c - 'A' + 10); // Convert ASCII hex to integer
+        result = (result << 4) | value; // Shift left 4 bits and add value
+    }
+
+    return result;
+}
+
 
 
 RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE) {
@@ -350,13 +366,17 @@ RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE) 
 
     	if(rylr998_ResponseFind(rx_packet.data)==RYLR_RCV_ACK){
     		cmd = RYLR_RCV_ACK;
+    	}else if(rylr998_ResponseFind(rx_packet.data)==RYLR_RCV_TIME){
+    	   iTOW_sync = ascii_hex_to_uint32(&rx_packet.data[4]);
+    	   cmd = RYLR_RCV_TIME;
     	}
 
     	//TODO proccess recived SYNC DATA
 
 
     } else if (cmd == RYLR_ERR) {
-        while (1) { Error_Handler(); } // Handle error
+        while (1) { Error_Handler();
+        } // Handle error
     }
     return cmd;
 }

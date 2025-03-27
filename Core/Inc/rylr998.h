@@ -30,6 +30,7 @@ typedef enum
 	//RYLR_FACTORY,
 	//RYLR_RESET,
 	//RYLR_READY,
+	RYLR_RCV_TIME,
 	RYLR_ERR,
 	RYLR_NOT_FOUND
 
@@ -76,7 +77,7 @@ typedef struct {
     RYLR_RX_command_t command;
 } RYLR_CommandEntry;
 
-
+extern uint32_t iTOW_sync;
 extern RYLR_RX_data_t rx_packet;
 
 //Tx CFG

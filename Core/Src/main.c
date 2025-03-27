@@ -116,33 +116,42 @@ int main(void)
 
 
 	//Configuration parameters
-	//rylr998_setChannel(1,3);
-
-
-
-  while (1)
-  {
+	rylr998_setChannel(1,3);
 
   //------------------------------
   // 		EXAMPLE SEND
   //------------------------------
-    LSU_sendParameters(0,-214748364, 2147483647, 655, 65535, 10);
-    LSU_sendSyncRequest(0);
+
+	LSU_sendParameters(0,-214748364, 2147483647, 655, 65535, 10); //uint16_t destination,int32_t Lat,int32_t Lon,uint16_t T1,uint16_t T2,uint8_t bpm)
+
+	LSU_sendSyncRequest(0);
 
 
-	HAL_Delay(100);
+
   //------------------------------
   // 		 EXAMPLE RECIVE
   //------------------------------
-	if(rylr998_GetInterruptFlag()){
-					if(rylr998_prase_reciver(rx_buff,RX_BUFF)==RYLR_RCV_ACK){
-						LEDBlink(GPIOB,GPIO_PIN_3,200);
-						LEDBlink(GPIOB,GPIO_PIN_3,200);
-						LEDBlink(GPIOB,GPIO_PIN_3,200);
-						LEDBlink(GPIOB,GPIO_PIN_3,200);
-						LEDBlink(GPIOB,GPIO_PIN_3,200);
-					}
-	}
+  while (1){
+	HAL_Delay(100);
+
+		if(rylr998_GetInterruptFlag()){
+			RYLR_RX_command_t status=rylr998_prase_reciver(rx_buff,RX_BUFF);
+
+						if(status==RYLR_RCV_ACK){
+							LEDBlink(GPIOB,GPIO_PIN_3,1000);
+						}
+						if(status==RYLR_RCV_TIME){		          //data is in the global extern uint32_t variable :iTOW_sync
+							LEDBlink(GPIOB,GPIO_PIN_3,500);
+							LEDBlink(GPIOB,GPIO_PIN_3,500);
+						}
+						if(status== RYLR_NOT_FOUND || RYLR_ERR){   //va a entrar al error handler
+							LEDBlink(GPIOB,GPIO_PIN_3,100);
+							LEDBlink(GPIOB,GPIO_PIN_3,100);
+							LEDBlink(GPIOB,GPIO_PIN_3,100);
+							LEDBlink(GPIOB,GPIO_PIN_3,100);
+							LEDBlink(GPIOB,GPIO_PIN_3,100);
+						}
+		}
 }
 }
 
