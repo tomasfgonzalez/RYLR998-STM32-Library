@@ -78,6 +78,7 @@ typedef struct {
 } RYLR_CommandEntry;
 
 extern uint32_t iTOW_sync;
+extern uint16_t address_sync;
 extern RYLR_RX_data_t rx_packet;
 
 //Tx CFG

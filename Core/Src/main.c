@@ -135,7 +135,7 @@ int main(void)
 	HAL_Delay(100);
 
 		if(rylr998_GetInterruptFlag()){
-			RYLR_RX_command_t status=rylr998_prase_reciver(rx_buff,RX_BUFF);
+			volatile RYLR_RX_command_t status=rylr998_prase_reciver(rx_buff,RX_BUFF);
 
 						if(status==RYLR_RCV_ACK){
 							LEDBlink(GPIOB,GPIO_PIN_3,1000);
@@ -144,7 +144,7 @@ int main(void)
 							LEDBlink(GPIOB,GPIO_PIN_3,500);
 							LEDBlink(GPIOB,GPIO_PIN_3,500);
 						}
-						if(status== RYLR_NOT_FOUND || RYLR_ERR){   //va a entrar al error handler
+						if(status== RYLR_NOT_FOUND || status==RYLR_ERR){   //va a entrar al error handler
 							LEDBlink(GPIOB,GPIO_PIN_3,100);
 							LEDBlink(GPIOB,GPIO_PIN_3,100);
 							LEDBlink(GPIOB,GPIO_PIN_3,100);

@@ -250,6 +250,7 @@ const RYLR_CommandEntry commandTable[] = {
 };
 
 uint32_t iTOW_sync;
+uint16_t address_sync;
 
 RYLR_RX_data_t rx_packet;
 
@@ -265,10 +266,10 @@ RYLR_RX_command_t rylr998_ResponseFind(const char *rxBuffer) {
 
 
 
-uint32_t ascii_hex_to_uint32(const char *data) {
+uint32_t ascii_hex_to_uint32(const char *data, uint8_t bytes) {
     uint32_t result = 0;
 
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < bytes; i++) {
         char c = data[i];
         uint8_t value = (c >= '0' && c <= '9') ? (c - '0') : (c - 'A' + 10); // Convert ASCII hex to integer
         result = (result << 4) | value; // Shift left 4 bits and add value
@@ -304,7 +305,7 @@ RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE) 
     if(cmd==RYLR_OK){
 
     } else if (cmd == RYLR_RCV) {
-    	char *ptr = aux_buff;
+    	volatile char *ptr = aux_buff;
     	memset(rx_packet.data, 0, sizeof(rx_packet.data));  // Initialize data as empty string
 
     	// Skip past "+RCV="
@@ -363,11 +364,12 @@ RYLR_RX_command_t rylr998_prase_reciver(uint8_t *pBuff, uint8_t RX_BUFFER_SIZE) 
     	//------------------------------
     	// 		 PROCESS RECIVED DATA:
     	//------------------------------
-
-    	if(rylr998_ResponseFind(rx_packet.data)==RYLR_RCV_ACK){
+    	volatile RYLR_RX_command_t data_comm=rylr998_ResponseFind(rx_packet.data);
+    	if(data_comm==RYLR_RCV_ACK){
     		cmd = RYLR_RCV_ACK;
-    	}else if(rylr998_ResponseFind(rx_packet.data)==RYLR_RCV_TIME){
-    	   iTOW_sync = ascii_hex_to_uint32(&rx_packet.data[4]);
+    	}else if(data_comm==RYLR_RCV_TIME){
+    	   iTOW_sync = ascii_hex_to_uint32(&rx_packet.data[4],8);
+    	   address_sync = ascii_hex_to_uint32(&rx_packet.data[10],4);
     	   cmd = RYLR_RCV_TIME;
     	}
 
